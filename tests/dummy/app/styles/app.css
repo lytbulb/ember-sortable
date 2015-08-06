@@ -1,6 +1,20 @@
+.is-dragging {
+	pointer-events: none;
+	cursor: move;
+}
+
 .demo {
   font-size: 32px;
   font-family: sans-serif;
+}
+
+.flex-box {
+	display: -webkit-box;      /* OLD - iOS 6-, Safari 3.1-6 */
+	display: -moz-box;         /* OLD - Firefox 19- (buggy but mostly works) */
+	display: -ms-flexbox;      /* TWEENER - IE 10 */
+	display: -webkit-flex;     /* NEW - Chrome */
+	display: flex;
+	flex-wrap: nowrap;
 }
 
 .demo h2 {
@@ -13,10 +27,15 @@
 }
 
 .demo ol {
-  display: block;
-  margin: 0;
+  display: inline-block;
+  margin: 50px;
   padding: 0;
   list-style: none outside;
+  border: 1px solid red;
+}
+
+.demo ol li {
+	width: 250px;
 }
 
 .demo footer {
@@ -26,7 +45,7 @@
 
 .demo .sortable-item {
   padding: 4px;
-  transition: all .125s;
+  transition: all 0.125s;
 }
 
 .demo .sortable-item.is-dragging {

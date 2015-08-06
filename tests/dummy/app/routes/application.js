@@ -2,15 +2,23 @@ import Ember from 'ember';
 const a = Ember.A;
 
 export default Ember.Route.extend({
+  
   model() {
     return {
-      items: a(['Uno', 'Dos', 'Tres', 'Cuatro', 'Cinco'])
+      one: a(['Uno', 'Dos', 'Tres', 'Cuatro', 'Cinco']),
+      two: a(['One', 'Two', 'Three', 'Four', 'Five'])
     };
   },
 
   actions: {
-    update(newOrder) {
-      this.set('currentModel.items', a(newOrder));
+    
+    add(item, destination, index) {
+    	destination.insertAt(index, item);
+    },
+    
+    remove(item, source) {
+    	source.removeObject(item);
     }
+    
   }
 });

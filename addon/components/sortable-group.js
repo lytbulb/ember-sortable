@@ -3,140 +3,186 @@ import layout from '../templates/components/sortable-group';
 import computed from 'ember-new-computed';
 const { A, Component, get, set, run } = Ember;
 const a = A;
-const NO_MODEL = {};
 
 export default Component.extend({
-  layout: layout,
-
-  /**
-    @property direction
-    @type string
-    @default y
-  */
-  direction: 'y',
-
-  /**
-    @property model
-    @type Any
-    @default null
-  */
-  model: NO_MODEL,
-
-  /**
-    @property items
-    @type Ember.NativeArray
-  */
-  items: computed(() => a()),
-
-  /**
-    Position for the first item.
-    @property itemPosition
-    @type Number
-  */
-  itemPosition: computed(function() {
-    let direction = this.get('direction');
-    return this.get(`sortedItems.firstObject.${direction}`);
-  }).volatile(),
-
-  /**
-    @property sortedItems
-    @type Array
-  */
-  sortedItems: computed(function() {
-    let items = a(this.get('items'));
-    let direction = this.get('direction');
-
-    return items.sortBy(direction);
-  }).volatile(),
-
-  /**
-    Register an item with this group.
-    @method registerItem
-    @param {SortableItem} [item]
-  */
-  registerItem(item) {
-    this.get('items').addObject(item);
-  },
-
-  /**
-    De-register an item with this group.
-    @method deregisterItem
-    @param {SortableItem} [item]
-  */
-  deregisterItem(item) {
-    this.get('items').removeObject(item);
-  },
-
-  /**
-    Prepare for sorting.
-    Main purpose is to stash the current itemPosition so
-    we don’t incur expensive re-layouts.
-    @method prepare
-  */
-  prepare() {
-    this._itemPosition = this.get('itemPosition');
-  },
-
-  /**
-    Update item positions.
-    @method update
-  */
-  update() {
-    let sortedItems = this.get('sortedItems');
-    let position = this._itemPosition;
-
-    // Just in case we haven’t called prepare first.
-    if (position === undefined) {
-      position = this.get('itemPosition');
-    }
-
-    sortedItems.forEach(item => {
-      let dimension;
-      let direction = this.get('direction');
-
-      if (!get(item, 'isDragging')) {
-        set(item, direction, position);
-      }
-
-      if (direction === 'x') {
-        dimension = 'width';
-      }
-      if (direction === 'y') {
-        dimension = 'height';
-      }
-
-      position += get(item, dimension);
-    });
-  },
-
-  /**
-    @method commit
-  */
-  commit() {
-    let items = this.get('sortedItems');
-    let groupModel = this.get('model');
-    let itemModels = items.mapBy('model');
-
-    delete this._itemPosition;
-
-    run.schedule('render', () => {
-      items.invoke('freeze');
-    });
-
-    run.schedule('afterRender', () => {
-      items.invoke('reset');
-    });
-
-    run.next(() => {
-      run.schedule('render', () => {
-        items.invoke('thaw');
-      });
-    });
-
-    if (groupModel !== NO_MODEL) {
-      this.sendAction('onChange', groupModel, itemModels);
-    } else {
-      this.sendAction('onChange', itemModels);
-    }
-  }
+	
+	layout: layout,
+	
+	manager: Ember.inject.service('sortable-manager'),
+	
+	register: Ember.on('didRender', function() {
+		this.get('manager').register(this);
+	}),
+  
+	/**
+	* @type {String}
+	*/
+	direction: 'y',
+	
+	/**
+	* @type {Array.<SortableItem>}
+	*/
+	items: computed(() => a()),
+  
+	/**
+	* Position for the first item.
+	* @type Number
+	*/
+	itemPosition: computed(function() {
+    	let direction = this.get('direction');
+    	let firstItem = this.get('sortedItems').findBy('isDragging', false);
+    
+    	this.set('positionX', get(firstItem, 'x'));
+    	
+    	return get(firstItem, direction);
+    }).volatile(),
+    
+    /**
+    * @type {Array.<SortedItem>}
+    */
+    sortedItems: computed(function() {
+    	return a(this.get('items')).sortBy(this.get('direction'));
+    }).volatile(),
+    
+    /**
+    * @param {SortableItem} item
+    */
+    registerItem(item) {
+    	this.get('items').addObject(item);
+    },
+    
+    /**
+    * @param {SortableItem} item
+    */
+    deregisterItem(item) {
+    	this.get('items').removeObject(item);
+    },
+    
+    /**
+    * @param {SortableItem} item
+    */
+    handleDragStart(item) {
+    	this.get('manager').handleDragStart(item, this);
+    },
+    
+    /**
+    * @param {SortableItem} item
+    */
+    handleDrop(item) {
+    	this.get('manager').handleDrop(item, this);
+    },
+    
+    /**
+    * Prepare for sorting.
+    * Main purpose is to stash the current itemPosition so
+    * we don't incur expensive re-layouts.
+    */
+    prepare() {
+    	if (!this._itemPosition) {
+  			this._itemPosition = this.get('itemPosition');
+  		}
+  		return this._itemPosition;
+  	},
+  	
+  	/**
+  	* Update item positions.
+  	*/
+  	update() {
+    	let position = this._itemPosition;
+    	let direction = this.get('direction');
+    	let dimension = {
+    		x: 'width',
+    		y: 'height'
+    	}[direction];
+    	
+    	this.get('sortedItems').forEach((item, index) => {
+    		if (!get(item, 'isDragging')) {
+    			set(item, direction, position);
+    		} else {
+    			set(this.get('manager'), 'insertAt', index);
+    		}
+    		if (get(item, 'isDropping')) {
+    			set(item, 'x', this.get('positionX'));
+    		}
+    		position += get(item, dimension);
+    	});
+    },
+    
+    /**
+  	* Make space for the item.
+  	*/
+    welcome(index, item) {
+    	let position = this._itemPosition;
+    	let direction = this.get('direction');
+    	let dimension = {
+    		x: 'width',
+    		y: 'height'
+    	}[direction];
+    	
+    	a(this.get('sortedItems')).removeObject(item).insertAt(index, item).forEach((item, index) => {
+    		if (!get(item, 'isDragging')) {
+    			set(item, direction, position);
+    		} else {
+    			set(this.get('manager'), 'insertAt', index);
+    		}
+    		if (get(item, 'isDropping')) {
+    			set(item, 'x', this.get('positionX'));
+    		}
+    		position += get(item, dimension);
+    	});
+    },
+    
+    /**
+  	* Make space for the item.
+  	*/
+    home(index, item) {
+    	let position = this._itemPosition;
+    	let direction = this.get('direction');
+    	let dimension = {
+    		x: 'width',
+    		y: 'height'
+    	}[direction];
+    	
+    	a(this.get('sortedItems')).removeObject(item).insertAt(index, item).forEach((item, index) => {
+    		console.log(item.get('model'), position);
+    		set(item, direction, position);
+    		if (get(item, 'isDropping')) {
+    			set(item, 'x', this.get('positionX'));
+    		}
+    		position += get(item, dimension);
+    	});
+    },
+    
+    /**
+    * @method commit
+    */
+    commit() {
+    	this.get('manager').handleCommit();
+    },
+    
+    /**
+    * @method cleanup
+    */
+    cleanup() {
+    	let items = this.get('sortedItems');
+    	
+    	delete this._itemPosition;
+    	
+    	run.schedule('render', () => {
+    		items.invoke('freeze');
+    	});
+    	
+    	run.schedule('afterRender', () => {
+    		items.invoke('reset');
+    	});
+    	
+    	run.next(() => {
+    		run.schedule('render', () => {
+    			items.invoke('thaw');
+    		});
+    	});
+    },
+    
+    
+    
 });

@@ -4,11 +4,21 @@
   </header>
 
   <main>
-    <section class="vertical-demo">
-      <h3>Vertical</h3>
-
-      {{#sortable-group tagName="ol" onChange="update" as |group|}}
-        {{#each model.items as |item|}}
+    <section class="vertical-demo flex-box">
+      
+      {{#sortable-group owner="1" tagName="ol" model=model.one onAdd="add" onRemove="remove" as |group|}}
+        {{#each model.one as |item|}}
+          {{#sortable-item tagName="li" model=item group=group handle=".handle"}}
+            {{item}}
+            <span class="handle">
+              <span>&vArr;</span>
+            </span>
+          {{/sortable-item}}
+        {{/each}}
+      {{/sortable-group}}
+      
+	  {{#sortable-group owner="2" tagName="ol" model=model.two onAdd="add" onRemove="remove" as |group|}}
+        {{#each model.two as |item|}}
           {{#sortable-item tagName="li" model=item group=group handle=".handle"}}
             {{item}}
             <span class="handle">
@@ -19,39 +29,6 @@
       {{/sortable-group}}
     </section>
 
-    <section class="horizontal-demo">
-      <h3>Horizontal</h3>
-
-      {{#sortable-group tagName="ol" direction="x" onChange="update" as |group|}}
-        {{#each model.items as |item|}}
-          {{#sortable-item tagName="li" model=item group=group}}
-            {{item}}
-          {{/sortable-item}}
-        {{/each}}
-      {{/sortable-group}}
-
-    </section>
-
-    <section class="table-demo">
-      <h3>Table</h3>
-
-      <table>
-        <thead>
-          <tr>
-            <th></th>
-            <th>Item</th>
-          </tr>
-        </thead>
-        {{#sortable-group tagName="tbody" onChange="update" as |group|}}
-          {{#each model.items as |item|}}
-            {{#sortable-item tagName="tr" model=item group=group handle=".handle"}}
-              <td><span class="handle">&vArr;</span></td>
-              <td>{{item}}</td>
-            {{/sortable-item}}
-          {{/each}}
-        {{/sortable-group}}
-      </table>
-    </section>
   </main>
 
   <footer>
