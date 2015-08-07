@@ -8,24 +8,44 @@ export default Component.extend({
 	
 	layout: layout,
 	
+	/**
+	* @type {SortableManager}
+	*/
 	manager: Ember.inject.service('sortable-manager'),
 	
-	register: Ember.on('didRender', function() {
-		this.get('manager').register(this);
-	}),
-  
 	/**
 	* @type {String}
 	*/
 	direction: 'y',
 	
 	/**
+    * Dimension based on direction.
+    * @readonly
+    * @type {String}
+    */
+  	dimension: computed('direction', function() {
+  		return {
+    		x: 'width',
+    		y: 'height'
+    	}[this.get('direction')];
+  	}).readOnly(),
+	
+	/**
+	* @readonly
 	* @type {Array.<SortableItem>}
 	*/
-	items: computed(() => a()),
+	items: computed(() => a()).readOnly(),
+	
+	/**
+	* The frequency in milliseconds with which the group updates
+	* the items' position.
+	* @type {Number}
+	*/
+	updateInterval: 125,
   
 	/**
 	* Position for the first item.
+	* @readonly
 	* @type Number
 	*/
 	itemPosition: computed(function() {
@@ -35,14 +55,19 @@ export default Component.extend({
     	this.set('positionX', get(firstItem, 'x'));
     	
     	return get(firstItem, direction);
-    }).volatile(),
+    }).volatile().readOnly(),
     
     /**
+    * @readonly
     * @type {Array.<SortedItem>}
     */
     sortedItems: computed(function() {
     	return a(this.get('items')).sortBy(this.get('direction'));
-    }).volatile(),
+    }).volatile().readOnly(),
+    
+    register: Ember.on('didInsertElement', function() {
+		this.get('manager').register(this);
+	}),
     
     /**
     * @param {SortableItem} item
@@ -85,15 +110,30 @@ export default Component.extend({
   	},
   	
   	/**
-  	* Update item positions.
+  	* Update items position.
   	*/
   	update() {
+		let position = this._itemPosition,
+			direction = this.get('direction'),
+			dimension = this.get('dimension');
+    	
+    	this.get('sortedItems').forEach((item, index) => {
+    		if (!get(item, 'isDragging')) {
+    			set(item, direction, position);
+    		} else {
+    			set(this.get('manager'), 'insertAt', index);
+    		}
+    		if (get(item, 'isDropping')) {
+    			set(item, 'x', this.get('positionX'));
+    		}
+    		position += get(item, dimension);
+    	});
+    },
+    
+    _applyUdate() {
     	let position = this._itemPosition;
     	let direction = this.get('direction');
-    	let dimension = {
-    		x: 'width',
-    		y: 'height'
-    	}[direction];
+    	let dimension = this.get('dimension');
     	
     	this.get('sortedItems').forEach((item, index) => {
     		if (!get(item, 'isDragging')) {
@@ -114,10 +154,7 @@ export default Component.extend({
     welcome(index, item) {
     	let position = this._itemPosition;
     	let direction = this.get('direction');
-    	let dimension = {
-    		x: 'width',
-    		y: 'height'
-    	}[direction];
+    	let dimension = this.get('dimension');
     	
     	a(this.get('sortedItems')).removeObject(item).insertAt(index, item).forEach((item, index) => {
     		if (!get(item, 'isDragging')) {
@@ -138,10 +175,7 @@ export default Component.extend({
     home(index, item) {
     	let position = this._itemPosition;
     	let direction = this.get('direction');
-    	let dimension = {
-    		x: 'width',
-    		y: 'height'
-    	}[direction];
+    	let dimension = this.get('dimension');
     	
     	a(this.get('sortedItems')).removeObject(item).insertAt(index, item).forEach((item, index) => {
     		console.log(item.get('model'), position);
