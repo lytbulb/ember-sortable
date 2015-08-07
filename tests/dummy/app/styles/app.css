@@ -17,6 +17,10 @@
 	flex-wrap: nowrap;
 }
 
+.flex-box > div {
+	margin: 50px;
+}
+
 .demo h2 {
   font-size: 1em;
 }
@@ -28,7 +32,6 @@
 
 .demo ol {
   display: inline-block;
-  margin: 50px;
   padding: 0;
   list-style: none outside;
   border: 1px solid red;

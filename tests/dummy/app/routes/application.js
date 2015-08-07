@@ -12,16 +12,16 @@ export default Ember.Route.extend({
 
   actions: {
     
-    add(item, destination, index) {
-    	destination.insertAt(index, item);
+    add(item, source, index) {
+    	source.insertAt(index, item);
     },
     
     remove(item, source, index) {
     	source.removeObject(item);
     },
     
-    sort(item, destination, index) {
-    	//destination.removeObject(item).insertAt(index, item);
+    move(item, source, index) {
+    	source.removeObject(item).insertAt(index, item);
     }
     
   }

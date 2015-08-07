@@ -36,13 +36,13 @@ export default Ember.Service.extend({
 			removeAt = this.get('removeAt'),
 			insertAt = this.get('insertAt');
 			
+		group.cleanup();
+		source.cleanup();
+		
 		if (group === source && insertAt !== removeAt) {
-			group.sendAction('onSort', item.get('model'), group.get('model'), insertAt);
+			group.sendAction('onMove', item.get('model'), group.get('model'), insertAt);
 		} else {
-			source.cleanup();
 			source.sendAction('onRemove', item.get('model'), source.get('model'), removeAt);
-			
-			group.cleanup();
 			group.sendAction('onAdd', item.get('model'), group.get('model'), insertAt);
 		}
 	},
