@@ -1,21 +1,13 @@
 import Ember from 'ember';
 import computed from 'ember-new-computed';
 
-const { A, Component, get, set, run } = Ember;
-
 export default Ember.Service.extend({
 
-	groups: computed(() => A()).readOnly(),
+	groups: computed(() => Ember.A()).readOnly(),
 
 	register(group) {
 		this.get('groups').push(group);
 	},
-	
-	/**
-	* Dragged item.
-	* @type {SortableItem}
-	*/
-	item: null,
 	
 	/**
 	* Index where the item is meant to be inserted.
@@ -30,32 +22,29 @@ export default Ember.Service.extend({
 	source: null,
 	
 	/**
-	* Group in which the item has been dropped.
-	* @type {SortableGroup}
+	* @param {SortableItem} item
+	* @type {SortableGroup} group
 	*/
-	destination: null,
-	
-	handleCommit() {
-		let item = this.get('item'),
-			source = this.get('source'),
-			destination = this.get('destination'),
+	handleCommit(item, group) {
+		let source = this.get('source'),
 			insertAt = this.get('insertAt');
 			
-		
 		source.cleanup();
-		destination.cleanup();
-		
 		source.sendAction('onRemove', item.get('model'), source.get('model'));
-		destination.sendAction('onAdd', item.get('model'), destination.get('model'), insertAt);
+		
+		group.cleanup();
+		group.sendAction('onAdd', item.get('model'), group.get('model'), insertAt);
 	},
 	
+	/**
+	* @param {SortableItem} item
+	* @type {SortableGroup} group
+	*/
 	handleDragStart(item, group) {
 	
 		this.setProperties({
-			item: item,
 			itemIndex: group.get('model').indexOf(item.get('model')),
 			source: group,
-			destination: group,
 			insertAt: group.get('model').indexOf(item.get('model'))
 		});
 		
@@ -65,18 +54,16 @@ export default Ember.Service.extend({
 	
 	/**
 	* @param {SortableItem} item
-	* @param {SortableGroup} group
 	*/
-	handleDrop() {
+	handleDrop(item) {
 		
 		this.unsubscribe();
 		
-		if (!this.get('destination')) {
-			this.set('item.group', this.get('source'));
-			this.set('destination', this.get('source'));
-			this.get('source').home(this.get('itemIndex'), this.get('item'));
+		if (!item.get('group')) {
+			item.set('group', this.get('source'));
+			item.get('group').home(this.get('itemIndex'), item);
 		} else {
-			this.get('destination').update();
+			item.get('group').update();
 		}
 		
 	},
@@ -86,15 +73,7 @@ export default Ember.Service.extend({
 	* @param {SortableGroup} group
 	*/
 	handleGroupMouseEnter(item, group) {
-		
-		if (this.get('destination')) {
-			this.get('destination').update();
-		} else {
-			this.get('source').update();
-		}
-		
-		this.setDestination(group);
-		
+		item.set('group', group);
 		this.get('source').update();
 	},
 	
@@ -103,23 +82,17 @@ export default Ember.Service.extend({
 	* @param {SortableGroup} group
 	*/
 	handleGroupMouseLeave(item, group) {
-	
-		this.setDestination(null);
-		
 		let source = this.get('source');
+	
+		item.set('group', null);
 		
+		// update the group as the item is no longer there
 		if (group !== source) {
-			// update the group as the item is no longer there
 			group.update();
 		}
 		
 		// highlight it's original position in the source
 		source.welcome(this.get('itemIndex'), item);
-	},
-	
-	setDestination(group) {
-		this.set('item.group', group);
-		this.set('destination', group);
 	},
 	
 	/**
@@ -141,15 +114,6 @@ export default Ember.Service.extend({
 				mouseLeave: null
 			});
 		});
-	},
-	
-	cancel() {
-		this.get('item');
 	}
-	
-	
-	
-	
-	
 
 });

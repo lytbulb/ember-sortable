@@ -169,8 +169,8 @@ export default Component.extend({
     /**
     * @method commit
     */
-    commit() {
-    	this.get('manager').handleCommit();
+    commit(item) {
+    	this.get('manager').handleCommit(item, this);
     },
     
     /**

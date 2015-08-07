@@ -220,7 +220,7 @@ export default Mixin.create({
     		isDropping: true
     	});
     	
-    	this.get('manager').handleDrop();
+    	this.get('manager').handleDrop(this);
     	
     	this._waitForTransition().then(run.bind(this, '_complete'));
     },
@@ -281,7 +281,7 @@ export default Mixin.create({
 
 	_complete() {
     	this.set('isDropping', false);
-    	this._tellGroup('commit');
+    	this._tellGroup('commit', this);
 	},
   
 	freeze() {
