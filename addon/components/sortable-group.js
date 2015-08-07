@@ -96,6 +96,7 @@ export default Component.extend({
     * @param {SortableItem} item
     */
     handleDragStart(item) {
+    	this.update();
     	this.get('manager').handleDragStart(item, this);
     },
     
