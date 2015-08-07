@@ -21,7 +21,6 @@ export default Ember.Route.extend({
     },
     
     sort(item, destination, index) {
-    	console.log(index);
     	//destination.removeObject(item).insertAt(index, item);
     }
     
