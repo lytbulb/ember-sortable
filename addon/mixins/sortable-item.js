@@ -187,7 +187,6 @@ export default Mixin.create({
       	event.preventDefault();
       	event.stopPropagation();
       	
-      	
       	let drag = this._makeDragHandler(event),
       		drop = () => {
     			$(window)
@@ -200,10 +199,31 @@ export default Mixin.create({
       		.on('mousemove touchmove', drag)
       		.on('mouseup touchend', drop);
       		
-      	this._tellGroup('prepare');
       	this._tellGroup('handleDragStart', this);
       	this.set('isDragging', true);
 	},
+	
+	_drag(x, y) {
+    	this.setProperties({
+    		x: x,
+    		y: y
+    	});
+    	
+    	this._tellGroup('handleDrag', this);
+    },
+    
+    _drop() {
+    	if (!this.element) { return; }
+    	
+    	this.setProperties({
+    		isDragging: false,
+    		isDropping: true
+    	});
+    	
+    	this.get('manager').handleDrop();
+    	
+    	this._waitForTransition().then(run.bind(this, '_complete'));
+    },
 
 	/**
 	* @param {Event} startEvent
@@ -242,28 +262,6 @@ export default Mixin.create({
     	this.$().css({transform: `translate(${dx}px,${dy}px)`});
     },
     
-    _drag(x, y) {
-    	this.setProperties({
-    		x: x,
-    		y: y
-    	});
-    	
-    	this._tellGroup('handleDrag', this);
-    },
-    
-    _drop() {
-    	if (!this.element) { return; }
-    	
-    	this.setProperties({
-    		isDragging: false,
-    		isDropping: true
-    	});
-    	
-    	this.get('manager').handleDrop();
-    	
-    	this._waitForTransition().then(run.bind(this, '_complete'));
-    },
-
 	/**
 	* @return Promise
 	*/

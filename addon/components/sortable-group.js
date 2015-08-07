@@ -48,14 +48,23 @@ export default Component.extend({
 	* @readonly
 	* @type Number
 	*/
-	itemPosition: computed(function() {
-    	let direction = this.get('direction');
-    	let firstItem = this.get('sortedItems').findBy('isDragging', false);
-    
-    	this.set('positionX', get(firstItem, 'x'));
-    	
-    	return get(firstItem, direction);
-    }).volatile().readOnly(),
+	position: computed({
+		get() {
+			if (!this._position) {
+				this._position = {
+		    		x: this.get('sortedItems.firstObject.x'),
+		    		y: this.get('sortedItems.firstObject.y')
+		    	};
+			}
+			return {
+				x: this._position.x,
+				y: this._position.y
+			};
+		},
+		set(key, value) {
+			this._position = value;
+		}
+    }).volatile(),
     
     /**
     * @readonly
@@ -105,35 +114,23 @@ export default Component.extend({
     },
     
     /**
-    * Prepare for sorting.
-    * Main purpose is to stash the current itemPosition so
-    * we don't incur expensive re-layouts.
-    */
-    prepare() {
-    	if (!this._itemPosition) {
-  			this._itemPosition = this.get('itemPosition');
-  		}
-  		return this._itemPosition;
-  	},
-  	
-    /**
   	* Update items position.
   	*/
     update() {
-    	let position = this._itemPosition;
     	let direction = this.get('direction');
+    	let position = this.get('position');
     	let dimension = this.get('dimension');
     	
     	this.get('sortedItems').forEach((item, index) => {
+    		
     		if (!get(item, 'isDragging')) {
-    			set(item, direction, position);
+    			item.setProperties(position);
     		} else {
-    			set(this.get('manager'), 'insertAt', index);
+    			set(this, 'manager.insertAt', index);
     		}
-    		if (get(item, 'isDropping')) {
-    			set(item, 'x', this.get('positionX'));
-    		}
-    		position += get(item, dimension);
+    		
+    		position[direction] += get(item, dimension);
+    		
     	});
     },
     
@@ -141,20 +138,17 @@ export default Component.extend({
   	* Make space for the item.
   	*/
     welcome(index, item) {
-    	let position = this._itemPosition;
+    	let position = this.get('position');
     	let direction = this.get('direction');
     	let dimension = this.get('dimension');
     	
     	a(this.get('sortedItems')).removeObject(item).insertAt(index, item).forEach((item, index) => {
     		if (!get(item, 'isDragging')) {
-    			set(item, direction, position);
+    			item.setProperties(position);
     		} else {
     			set(this.get('manager'), 'insertAt', index);
     		}
-    		if (get(item, 'isDropping')) {
-    			set(item, 'x', this.get('positionX'));
-    		}
-    		position += get(item, dimension);
+    		position[direction] += get(item, dimension);
     	});
     },
     
@@ -162,17 +156,13 @@ export default Component.extend({
   	* Make space for the item.
   	*/
     home(index, item) {
-    	let position = this._itemPosition;
+    	let position = this.get('position');
     	let direction = this.get('direction');
     	let dimension = this.get('dimension');
     	
     	a(this.get('sortedItems')).removeObject(item).insertAt(index, item).forEach((item, index) => {
-    		console.log(item.get('model'), position);
-    		set(item, direction, position);
-    		if (get(item, 'isDropping')) {
-    			set(item, 'x', this.get('positionX'));
-    		}
-    		position += get(item, dimension);
+    		item.setProperties(position);
+    		position[direction] += get(item, dimension);
     	});
     },
     
@@ -189,8 +179,6 @@ export default Component.extend({
     cleanup() {
     	let items = this.get('sortedItems');
     	
-    	delete this._itemPosition;
-    	
     	run.schedule('render', () => {
     		items.invoke('freeze');
     	});
@@ -204,8 +192,6 @@ export default Component.extend({
     			items.invoke('thaw');
     		});
     	});
-    },
-    
-    
+    }
     
 });

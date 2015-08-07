@@ -1,9 +1,11 @@
 import Ember from 'ember';
+import computed from 'ember-new-computed';
+
 const { A, Component, get, set, run } = Ember;
 
 export default Ember.Service.extend({
 
-	groups: [],
+	groups: computed(() => A()).readOnly(),
 
 	register(group) {
 		this.get('groups').push(group);
@@ -90,8 +92,6 @@ export default Ember.Service.extend({
 		} else {
 			this.get('source').update();
 		}
-		
-		group.prepare();
 		
 		this.setDestination(group);
 		
