@@ -64,13 +64,6 @@ export default Mixin.create({
 	isBusy: computed.or('isDragging', 'isDropping'),
 	
 	/**
-	* The frequency in milliseconds with which the group is informed
-	* that an update is required.
-	* @type {Number}
-	*/
-	updateInterval: 125,
-	
-	/**
 	* True if the item transitions with animation.
 	* @type {Boolean}
 	*/
@@ -255,7 +248,7 @@ export default Mixin.create({
     		y: y
     	});
     	
-    	run.throttle(this, '_tellGroup', 'update', this.get('updateInterval'));
+    	this._tellGroup('handleDrag', this);
     },
     
     _drop() {
@@ -266,11 +259,7 @@ export default Mixin.create({
     		isDropping: true
     	});
     	
-    	//this._tellGroup('handleDrop', this);
-    	
     	this.get('manager').handleDrop();
-    	
-    	//this._tellGroup('update');
     	
     	this._waitForTransition().then(run.bind(this, '_complete'));
     },

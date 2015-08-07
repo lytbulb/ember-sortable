@@ -93,8 +93,7 @@ export default Ember.Service.extend({
 		
 		group.prepare();
 		
-		item.set('group', group);
-		this.set('destination', group);
+		this.setDestination(group);
 		
 		this.get('source').update();
 	},
@@ -105,18 +104,22 @@ export default Ember.Service.extend({
 	*/
 	handleGroupMouseLeave(item, group) {
 	
-		item.set('group', null);
-		this.set('destination', null);
+		this.setDestination(null);
 		
 		let source = this.get('source');
 		
-		if (source !== group) {
+		if (group !== source) {
+			// update the group as the item is no longer there
 			group.update();
 		}
 		
-		// highlight item's original position
-		this.get('source').welcome(this.get('itemIndex'), item);
-		
+		// highlight it's original position in the source
+		source.welcome(this.get('itemIndex'), item);
+	},
+	
+	setDestination(group) {
+		this.set('item.group', group);
+		this.set('destination', group);
 	},
 	
 	/**

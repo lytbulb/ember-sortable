@@ -93,6 +93,13 @@ export default Component.extend({
     /**
     * @param {SortableItem} item
     */
+    handleDrag(item) {
+		run.throttle(this, 'update', this.get('updateInterval'));
+    },
+    
+    /**
+    * @param {SortableItem} item
+    */
     handleDrop(item) {
     	this.get('manager').handleDrop(item, this);
     },
@@ -109,28 +116,10 @@ export default Component.extend({
   		return this._itemPosition;
   	},
   	
-  	/**
+    /**
   	* Update items position.
   	*/
-  	update() {
-		let position = this._itemPosition,
-			direction = this.get('direction'),
-			dimension = this.get('dimension');
-    	
-    	this.get('sortedItems').forEach((item, index) => {
-    		if (!get(item, 'isDragging')) {
-    			set(item, direction, position);
-    		} else {
-    			set(this.get('manager'), 'insertAt', index);
-    		}
-    		if (get(item, 'isDropping')) {
-    			set(item, 'x', this.get('positionX'));
-    		}
-    		position += get(item, dimension);
-    	});
-    },
-    
-    _applyUdate() {
+    update() {
     	let position = this._itemPosition;
     	let direction = this.get('direction');
     	let dimension = this.get('dimension');
