@@ -6,7 +6,7 @@
   <main>
     <section class="vertical-demo flex-box">
       
-      {{#sortable-group owner="1" tagName="ol" model=model.one onAdd="add" onRemove="remove" as |group|}}
+      {{#sortable-group owner="1" tagName="ol" model=model.one onSort="sort" onAdd="add" onRemove="remove" as |group|}}
         {{#each model.one as |item|}}
           {{#sortable-item tagName="li" model=item group=group handle=".handle"}}
             {{item}}
@@ -17,7 +17,7 @@
         {{/each}}
       {{/sortable-group}}
       
-	  {{#sortable-group owner="2" tagName="ol" model=model.two onAdd="add" onRemove="remove" as |group|}}
+	  {{#sortable-group owner="2" tagName="ol" model=model.two onSort="sort" onAdd="add" onRemove="remove" as |group|}}
         {{#each model.two as |item|}}
           {{#sortable-item tagName="li" model=item group=group handle=".handle"}}
             {{item}}

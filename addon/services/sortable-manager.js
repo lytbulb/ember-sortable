@@ -27,13 +27,18 @@ export default Ember.Service.extend({
 	*/
 	handleCommit(item, group) {
 		let source = this.get('source'),
+			itemIndex = this.get('itemIndex'),
 			insertAt = this.get('insertAt');
 			
-		source.cleanup();
-		source.sendAction('onRemove', item.get('model'), source.get('model'));
-		
-		group.cleanup();
-		group.sendAction('onAdd', item.get('model'), group.get('model'), insertAt);
+		if (group === source && insertAt !== itemIndex) {
+			group.sendAction('onSort', item.get('model'), group.get('model'), insertAt);
+		} else {
+			source.cleanup();
+			source.sendAction('onRemove', item.get('model'), source.get('model'), itemIndex);
+			
+			group.cleanup();
+			group.sendAction('onAdd', item.get('model'), group.get('model'), insertAt);
+		}
 	},
 	
 	/**
