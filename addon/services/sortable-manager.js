@@ -16,6 +16,12 @@ export default Ember.Service.extend({
 	insertAt: null,
 	
 	/**
+	* Index where the item is meant to be removed.
+	* @type {Number}
+	*/
+	removeAt: null,
+	
+	/**
 	* Group from which the item is being dragged.
 	* @type {SortableGroup}
 	*/
@@ -27,14 +33,14 @@ export default Ember.Service.extend({
 	*/
 	handleCommit(item, group) {
 		let source = this.get('source'),
-			itemIndex = this.get('itemIndex'),
+			removeAt = this.get('removeAt'),
 			insertAt = this.get('insertAt');
 			
-		if (group === source && insertAt !== itemIndex) {
+		if (group === source && insertAt !== removeAt) {
 			group.sendAction('onSort', item.get('model'), group.get('model'), insertAt);
 		} else {
 			source.cleanup();
-			source.sendAction('onRemove', item.get('model'), source.get('model'), itemIndex);
+			source.sendAction('onRemove', item.get('model'), source.get('model'), removeAt);
 			
 			group.cleanup();
 			group.sendAction('onAdd', item.get('model'), group.get('model'), insertAt);
@@ -48,7 +54,7 @@ export default Ember.Service.extend({
 	handleDragStart(item, group) {
 	
 		this.setProperties({
-			itemIndex: group.get('model').indexOf(item.get('model')),
+			removeAt: group.get('model').indexOf(item.get('model')),
 			source: group,
 			insertAt: group.get('model').indexOf(item.get('model'))
 		});
@@ -66,7 +72,7 @@ export default Ember.Service.extend({
 		
 		if (!item.get('group')) {
 			item.set('group', this.get('source'));
-			item.get('group').home(this.get('itemIndex'), item);
+			item.get('group').home(this.get('removeAt'), item);
 		} else {
 			item.get('group').update();
 		}
@@ -97,7 +103,7 @@ export default Ember.Service.extend({
 		}
 		
 		// highlight it's original position in the source
-		source.welcome(this.get('itemIndex'), item);
+		source.welcome(this.get('removeAt'), item);
 	},
 	
 	/**
