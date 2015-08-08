@@ -6,7 +6,8 @@ export default Ember.Route.extend({
   model() {
     return {
       one: a(['Uno', 'Dos', 'Tres', 'Cuatro', 'Cinco']),
-      two: a(['One', 'Two', 'Three', 'Four', 'Five'])
+      two: a(['One', 'Two', 'Three', 'Four', 'Five']),
+      three: a(['Eins', 'Zwei', 'Drei', 'Vier', 'Funf'])
     };
   },
 

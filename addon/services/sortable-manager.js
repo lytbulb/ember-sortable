@@ -31,36 +31,47 @@ export default Ember.Service.extend({
 	* @param {SortableItem} item
 	* @type {SortableGroup} group
 	*/
-	handleCommit(item, group) {
-		let source = this.get('source'),
-			removeAt = this.get('removeAt'),
-			insertAt = this.get('insertAt');
-			
-		group.cleanup();
-		source.cleanup();
+	handleDragStart(item, group) {
+		this.subscribe(item, group);
+		group.set('acceptsDrop', true);
 		
-		if (group === source && insertAt !== removeAt) {
-			group.sendAction('onMove', item.get('model'), group.get('model'), insertAt);
-		} else {
-			source.sendAction('onRemove', item.get('model'), source.get('model'), removeAt);
-			group.sendAction('onAdd', item.get('model'), group.get('model'), insertAt);
+		this.setProperties({
+			source: group,
+			insertAt: group.get('model').indexOf(item.get('model')),
+			removeAt: group.get('model').indexOf(item.get('model'))
+		});
+	},
+	
+	/**
+	* @param {SortableItem} item
+	* @param {SortableGroup} group
+	*/
+	handleGroupMouseEnter(item, group) {
+		if (group.isConnected(this.get('source'))) {
+			group.set('inviteDrop', true);
+			item.set('group', group);
+			this.get('source').update();
 		}
 	},
 	
 	/**
 	* @param {SortableItem} item
-	* @type {SortableGroup} group
+	* @param {SortableGroup} group
 	*/
-	handleDragStart(item, group) {
+	handleGroupMouseLeave(item, group) {
+		let source = this.get('source');
 	
-		this.setProperties({
-			removeAt: group.get('model').indexOf(item.get('model')),
-			source: group,
-			insertAt: group.get('model').indexOf(item.get('model'))
-		});
+		item.set('group', null);
 		
-		this.subscribe(item);
-	  	
+		group.set('inviteDrop', false);
+		
+		// update the group as the item is no longer in it
+		if (group !== source) {
+			group.update();
+		}
+		
+		// highlight item's original position in the source
+		source.welcome(this.get('removeAt'), item);
 	},
 	
 	/**
@@ -81,37 +92,33 @@ export default Ember.Service.extend({
 	
 	/**
 	* @param {SortableItem} item
-	* @param {SortableGroup} group
+	* @type {SortableGroup} group
 	*/
-	handleGroupMouseEnter(item, group) {
-		item.set('group', group);
-		this.get('source').update();
-	},
-	
-	/**
-	* @param {SortableItem} item
-	* @param {SortableGroup} group
-	*/
-	handleGroupMouseLeave(item, group) {
-		let source = this.get('source');
-	
-		item.set('group', null);
+	handleCommit(item, group) {
+		let source = this.get('source'),
+			removeAt = this.get('removeAt'),
+			insertAt = this.get('insertAt');
+			
+		group.cleanup();
+		source.cleanup();
 		
-		// update the group as the item is no longer there
-		if (group !== source) {
-			group.update();
+		if (group === source && insertAt !== removeAt) {
+			group.sendAction('onMove', item.get('model'), group.get('model'), insertAt);
 		}
-		
-		// highlight it's original position in the source
-		source.welcome(this.get('removeAt'), item);
+		else if (group !== source) {
+			source.sendAction('onRemove', item.get('model'), source.get('model'), removeAt);
+			group.sendAction('onAdd', item.get('model'), group.get('model'), insertAt);
+		}
 	},
 	
 	/**
 	* @param {SortableItem} item
 	*/
-	subscribe(item) {
+	subscribe(item, source) {
 		this.get('groups').forEach(group => {
 			group.setProperties({
+				acceptsDrop: group.get('connect') === source.get('connect'),
+				rejectsDrop: group.get('connect') !== source.get('connect'),
 				mouseEnter: this.handleGroupMouseEnter.bind(this, item, group),
 				mouseLeave: this.handleGroupMouseLeave.bind(this, item, group)
 			});
@@ -121,6 +128,7 @@ export default Ember.Service.extend({
 	unsubscribe() {
 		this.get('groups').forEach(group => {
 			group.setProperties({
+				rejectsDrop: null,
 				mouseEnter: null,
 				mouseLeave: null
 			});

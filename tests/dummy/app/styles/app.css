@@ -3,6 +3,18 @@
 	cursor: move;
 }
 
+.demo ol.invite-drop {
+	border: 1px dashed green;
+}
+
+.demo ol.accepts-drop {
+	background: rgba(0,255,0,0.1);
+}
+
+.demo ol.rejects-drop {
+	opacity: 0.5;
+}
+
 .demo {
   font-size: 32px;
   font-family: sans-serif;
@@ -34,7 +46,7 @@
   display: inline-block;
   padding: 0;
   list-style: none outside;
-  border: 1px solid red;
+  border: 1px solid white;
 }
 
 .demo ol li {

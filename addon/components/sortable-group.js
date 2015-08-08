@@ -5,6 +5,8 @@ const { A, Component, get, set, run } = Ember;
 const a = A;
 
 export default Component.extend({
+
+	classNameBindings: ['acceptsDrop', 'rejectsDrop', 'inviteDrop'],
 	
 	layout: layout,
 	
@@ -12,6 +14,13 @@ export default Component.extend({
 	* @type {SortableManager}
 	*/
 	manager: Ember.inject.service('sortable-manager'),
+	
+	acceptsDrop: false,
+	
+	rejectsDrop: false,
+	
+	inviteDrop: false,
+	
 	
 	/**
 	* @type {String}
@@ -90,6 +99,13 @@ export default Component.extend({
     */
     deregisterItem(item) {
     	this.get('items').removeObject(item);
+    },
+    
+    /**
+    * @param {SortableGroup} group
+    */
+    isConnected(group) {
+    	return this.get('connect') === group.get('connect');
     },
     
     /**
@@ -179,6 +195,12 @@ export default Component.extend({
     */
     cleanup() {
     	let items = this.get('sortedItems');
+    	
+    	this.setProperties({
+    		acceptsDrop: false,
+    		rejectsDrop: false,
+    		inviteDrop: false
+    	});
     	
     	run.schedule('render', () => {
     		items.invoke('freeze');

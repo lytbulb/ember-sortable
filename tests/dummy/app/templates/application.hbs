@@ -12,7 +12,7 @@
 		  	{{item}} 
 		  {{/each}}
 		 </div>
-		  {{#sortable-group owner="1" tagName="ol" model=model.one onMove="move" onAdd="add" onRemove="remove" as |group|}}
+		  {{#sortable-group connect="no-german" tagName="ol" model=model.one onMove="move" onAdd="add" onRemove="remove" as |group|}}
 		    {{#each model.one as |item|}}
 		      {{#sortable-item tagName="li" model=item group=group handle=".handle"}}
 		        {{item}}
@@ -23,13 +23,30 @@
 		    {{/each}}
 		  {{/sortable-group}}
 	  </div>
+	  <div>
+      	<div style="font-size: 11px;">
+	      {{#each model.three as |item|}}
+		  	{{item}} 
+		  {{/each}}
+		 </div>
+		  {{#sortable-group connect="only-german" tagName="ol" model=model.three onMove="move" onAdd="add" onRemove="remove" as |group|}}
+	        {{#each model.three as |item|}}
+	          {{#sortable-item tagName="li" model=item group=group handle=".handle"}}
+	            {{item}}
+	            <span class="handle">
+	              <span>&vArr;</span>
+	            </span>
+	          {{/sortable-item}}
+	        {{/each}}
+	      {{/sortable-group}}
+      </div>
       <div>
       	<div style="font-size: 11px;">
 	      {{#each model.two as |item|}}
 		  	{{item}} 
 		  {{/each}}
 		 </div>
-		  {{#sortable-group owner="2" tagName="ol" model=model.two onMove="move" onAdd="add" onRemove="remove" as |group|}}
+		  {{#sortable-group connect="no-german" tagName="ol" model=model.two onMove="move" onAdd="add" onRemove="remove" as |group|}}
 	        {{#each model.two as |item|}}
 	          {{#sortable-item tagName="li" model=item group=group handle=".handle"}}
 	            {{item}}
