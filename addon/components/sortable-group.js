@@ -170,20 +170,6 @@ export default Component.extend({
     },
     
     /**
-  	* Make space for the item.
-  	*/
-    home(index, item) {
-    	let position = this.get('position');
-    	let direction = this.get('direction');
-    	let dimension = this.get('dimension');
-    	
-    	a(this.get('sortedItems')).removeObject(item).insertAt(index, item).forEach((item, index) => {
-    		item.setProperties(position);
-    		position[direction] += get(item, dimension);
-    	});
-    },
-    
-    /**
     * @method commit
     */
     commit(item) {

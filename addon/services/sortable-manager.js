@@ -34,6 +34,8 @@ export default Ember.Service.extend({
 	handleDragStart(item, group) {
 		this.subscribe(item, group);
 		
+		group.set('inviteDrop', true);
+		
 		this.setProperties({
 			source: group,
 			insertAt: group.get('model').indexOf(item.get('model')),
@@ -81,8 +83,10 @@ export default Ember.Service.extend({
 		this.unsubscribe();
 		
 		if (!item.get('group')) {
+			// if item is dropped outside any group
+			// we will set its group back to source
 			item.set('group', this.get('source'));
-			item.get('group').home(this.get('removeAt'), item);
+			item.get('group').welcome(this.get('removeAt'), item);
 		} else {
 			item.get('group').update();
 		}
