@@ -111,6 +111,13 @@ export default Component.extend({
     /**
     * @param {SortableItem} item
     */
+    indexOf(item) {
+    	return this.get('sortedItems').indexOf(item);
+    },
+    
+    /**
+    * @param {SortableItem} item
+    */
     handleDragStart(item) {
     	this.update();
     	this.get('manager').handleDragStart(item, this);
@@ -132,18 +139,19 @@ export default Component.extend({
     
     /**
   	* Update items position.
+  	* @param {Array.<SortableItem>} items
   	*/
-    update() {
+    update(items) {
     	let direction = this.get('direction');
     	let position = this.get('position');
     	let dimension = this.get('dimension');
     	
-    	this.get('sortedItems').forEach((item, index) => {
+    	(items || this.get('sortedItems')).forEach((item, index) => {
     		
     		if (!get(item, 'isDragging')) {
     			item.setProperties(position);
     		} else {
-    			set(this, 'manager.insertAt', index);
+    			item.set('insertAt', index);
     		}
     		
     		position[direction] += get(item, dimension);
@@ -155,18 +163,7 @@ export default Component.extend({
   	* Make space for the item.
   	*/
     welcome(index, item) {
-    	let position = this.get('position');
-    	let direction = this.get('direction');
-    	let dimension = this.get('dimension');
-    	
-    	a(this.get('sortedItems')).removeObject(item).insertAt(index, item).forEach((item, index) => {
-    		if (!get(item, 'isDragging')) {
-    			item.setProperties(position);
-    		} else {
-    			set(this.get('manager'), 'insertAt', index);
-    		}
-    		position[direction] += get(item, dimension);
-    	});
+    	this.update(this.get('sortedItems').removeObject(item).insertAt(index, item));
     },
     
     /**

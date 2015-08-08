@@ -10,24 +10,6 @@ export default Ember.Service.extend({
 	},
 	
 	/**
-	* Index where the item is meant to be inserted.
-	* @type {Number}
-	*/
-	insertAt: null,
-	
-	/**
-	* Index where the item is meant to be removed.
-	* @type {Number}
-	*/
-	removeAt: null,
-	
-	/**
-	* Group from which the item is being dragged.
-	* @type {SortableGroup}
-	*/
-	source: null,
-	
-	/**
 	* @param {SortableItem} item
 	* @type {SortableGroup} group
 	*/
@@ -36,10 +18,10 @@ export default Ember.Service.extend({
 		
 		group.set('inviteDrop', true);
 		
-		this.setProperties({
+		item.setProperties({
 			source: group,
-			insertAt: group.get('model').indexOf(item.get('model')),
-			removeAt: group.get('model').indexOf(item.get('model'))
+			insertAt: group.indexOf(item),
+			removeAt: group.indexOf(item)
 		});
 	},
 	
@@ -48,10 +30,10 @@ export default Ember.Service.extend({
 	* @param {SortableGroup} group
 	*/
 	handleGroupMouseEnter(item, group) {
-		if (group.isConnected(this.get('source'))) {
+		if (group.isConnected(item.get('source'))) {
 			group.set('inviteDrop', true);
 			item.set('group', group);
-			this.get('source').update();
+			item.get('source').update();
 		}
 	},
 	
@@ -60,7 +42,7 @@ export default Ember.Service.extend({
 	* @param {SortableGroup} group
 	*/
 	handleGroupMouseLeave(item, group) {
-		let source = this.get('source');
+		let source = item.get('source');
 	
 		item.set('group', null);
 		
@@ -72,7 +54,7 @@ export default Ember.Service.extend({
 		}
 		
 		// highlight item's original position in the source
-		source.welcome(this.get('removeAt'), item);
+		source.welcome(item.get('removeAt'), item);
 	},
 	
 	/**
@@ -82,11 +64,11 @@ export default Ember.Service.extend({
 		
 		this.unsubscribe();
 		
+		// if item is dropped outside any group
 		if (!item.get('group')) {
-			// if item is dropped outside any group
 			// we will set its group back to source
-			item.set('group', this.get('source'));
-			item.get('group').welcome(this.get('removeAt'), item);
+			item.set('group', item.get('source'));
+			item.get('group').welcome(item.get('removeAt'), item);
 		} else {
 			item.get('group').update();
 		}
@@ -98,9 +80,9 @@ export default Ember.Service.extend({
 	* @type {SortableGroup} group
 	*/
 	handleCommit(item, group) {
-		let source = this.get('source'),
-			removeAt = this.get('removeAt'),
-			insertAt = this.get('insertAt');
+		let source = item.get('source'),
+			removeAt = item.get('removeAt'),
+			insertAt = item.get('insertAt');
 			
 		group.cleanup();
 		source.cleanup();
