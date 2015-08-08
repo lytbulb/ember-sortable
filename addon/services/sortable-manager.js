@@ -33,7 +33,6 @@ export default Ember.Service.extend({
 	*/
 	handleDragStart(item, group) {
 		this.subscribe(item, group);
-		group.set('acceptsDrop', true);
 		
 		this.setProperties({
 			source: group,
