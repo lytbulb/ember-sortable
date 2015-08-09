@@ -4,15 +4,15 @@ const { Mixin, $, run } = Ember;
 const { Promise } = Ember.RSVP;
 
 export default Mixin.create({
-	
+
 	classNameBindings: ['isDragging', 'isDropping', ':sortable-item'],
-	
+
 	manager: Ember.inject.service('sortable-manager'),
-	
+
 	deregister: Ember.on('willDestroyElement', function() {
 		this.set('group', null);
 	}),
-	
+
 	/**
 	* Group to which the item belongs.
 	* @type {SortableGroup}
@@ -34,35 +34,35 @@ export default Mixin.create({
 			}
 		},
 	}).volatile(),
-	
+
 	/**
 	* Model which the item represents.
 	* @type *
 	*/
 	model: null,
-	
+
 	/**
 	* Selector for the element to use as handle.
 	* If unset, the entire element will be used as the handle.
 	* @type {String}
 	*/
 	handle: null,
-	
+
 	/**
 	* @type {Boolean}
 	*/
 	isDragging: false,
-	
+
 	/**
 	* @type {Boolean}
 	*/
 	isDropping: false,
-	
+
 	/**
 	* @type {Boolean}
 	*/
 	isBusy: computed.or('isDragging', 'isDropping'),
-	
+
 	/**
 	* True if the item transitions with animation.
 	* @type {Boolean}
@@ -70,10 +70,10 @@ export default Mixin.create({
 	isAnimated: computed(function() {
 		let el = this.$();
 		let property = el.css('transition-property');
-		
+
 		return /all|transform/.test(property);
 	}).volatile(),
-	
+
 	/**
 	* The current transition duration in milliseconds.
 	* @type {Number}
@@ -82,22 +82,22 @@ export default Mixin.create({
 		let el = this.$();
 		let rule = el.css('transition-duration');
 		let match = rule.match(/([\d\.]+)([ms]*)/);
-		
+
 		if (match) {
 			let value = parseFloat(match[1]);
 			let unit = match[2];
-			
+
 			if (unit === 's') {
 				value = value * 1000;
 			}
-			
+
 			return value;
 		}
-		
+
 		return 0;
-		
+
 	}).volatile(),
-	
+
 	/**
 	* Horizontal position of the item.
 	* @type {Number}
@@ -117,7 +117,7 @@ export default Mixin.create({
 			}
 		},
 	}).volatile(),
-	
+
 	/**
 	* Vertical position of the item relative to its offset parent.
 	* @type {Number}
@@ -136,7 +136,7 @@ export default Mixin.create({
 			}
 		}
 	}).volatile(),
-	
+
 	/**
 	* Width of the item.
 	* @type Number
@@ -144,12 +144,12 @@ export default Mixin.create({
 	width: computed(function() {
 		let el = this.$();
 		let width = el.outerWidth(true);
-		
+
 		width += getBorderSpacing(el).horizontal;
-		
+
 		return width;
 	}).volatile(),
-	
+
 	/**
 	* Height of the item including margins.
 	* @type {Number}
@@ -158,72 +158,100 @@ export default Mixin.create({
 		let el = this.$();
 		let height = el.outerHeight();
 		let marginBottom = parseFloat(el.css('margin-bottom'));
-		
+
 		height += marginBottom;
 		height += getBorderSpacing(el).vertical;
-		
+
 		return height;
 	}).volatile(),
-	
+
 	/**
 	* @param {jQuery.Event}
 	*/
 	mouseDown(event) {
-		this._startDrag(event);
+		this._primeDrag(event);
 	},
-	
+
 	/**
 	* @param {jQuery.Event}
 	*/
 	touchStart(event) {
-		this._startDrag(event);
+		this._primeDrag(event);
 	},
-	
+
+   /**
+    @method _primeDrag
+    @private
+  */
+  _primeDrag(event) {
+    let handle = this.get('handle');
+
+    if (handle && !$(event.target).closest(handle).length || this.get('isBusy')) { return; }
+
+    event.preventDefault();
+    event.stopPropagation();
+
+    let startDragListener = (event) => {
+      cancelStartDragListener();
+      this._startDrag(event);
+    };
+
+    function cancelStartDragListener() {
+      $(window).off('mousemove', startDragListener);
+    }
+
+    $(window).one('mousemove', startDragListener);
+    $(window).one('mouseup', cancelStartDragListener);
+  },
+
 	_startDrag(event) {
-		let handle = this.get('handle');
-		
-		if (handle && !$(event.target).closest(handle).length || this.get('isBusy')) { return; }
-      	
-      	event.preventDefault();
-      	event.stopPropagation();
-      	
-      	let drag = this._makeDragHandler(event),
-      		drop = () => {
-    			$(window)
-      				.off('mousemove touchmove', drag)
-      				.off('mouseup touchend', drop);
-      			this._drop();
-    		};
-      	
-      	$(window)
-      		.on('mousemove touchmove', drag)
-      		.on('mouseup touchend', drop);
-      		
-      	this._tellGroup('handleDragStart', this);
-      	this.set('isDragging', true);
+  	let drag = this._makeDragHandler(event),
+  		drop = () => {
+			$(window)
+  				.off('mousemove touchmove', drag)
+  				.off('mouseup touchend', drop);
+  			this._drop();
+		};
+
+  	$(window)
+  		.on('mousemove touchmove', drag)
+  		.on('mouseup touchend', drop);
+
+  	this._tellGroup('handleDragStart', this);
+  	this.set('isDragging', true);
 	},
-	
+
 	_drag(x, y) {
     	this.setProperties({
     		x: x,
     		y: y
     	});
-    	
+
     	this._tellGroup('handleDrag', this);
     },
-    
+
     _drop() {
     	if (!this.element) { return; }
-    	
+
+      this._preventClick(this.element);
+
     	this.setProperties({
     		isDragging: false,
     		isDropping: true
     	});
-    	
+
     	this.get('manager').handleDrop(this);
-    	
+
     	this._waitForTransition().then(run.bind(this, '_complete'));
     },
+
+  /**
+    @method _preventClick
+    @private
+  */
+  _preventClick(element) {
+    $(element).one('click', function(e){ e.stopImmediatePropagation(); } );
+  },
 
 	/**
 	* @param {Event} startEvent
@@ -234,34 +262,34 @@ export default Mixin.create({
 			dragYOrigin = getY(startEvent),
     		elementXOrigin = this.get('x'),
     		elementYOrigin = this.get('y');
-    		
+
     	return event => {
     		this._drag(elementXOrigin + getX(event) - dragXOrigin,
     			elementYOrigin + getY(event) - dragYOrigin);
     	};
     },
-    
+
     _tellGroup(method, ...args) {
     	let group = this.get('group');
-    	
+
     	if (group) {
     		group[method](...args);
     	}
     },
-    
+
     _scheduleApplyPosition() {
     	run.scheduleOnce('render', this, '_applyPosition');
     },
-    
+
     _applyPosition() {
     	if (!this.element) { return; }
-    	
+
     	let dx = this.get('x') - this.element.offsetLeft + parseFloat(this.$().css('margin-left')),
     		dy = this.get('y') - this.element.offsetTop;
-    		
+
     	this.$().css({transform: `translate(${dx}px,${dy}px)`});
     },
-    
+
 	/**
 	* @return Promise
 	*/
@@ -269,11 +297,11 @@ export default Mixin.create({
 		return new Promise(resolve => {
 			run.next(() => {
 				let duration = 0;
-				
+
 				if (this.get('isAnimated')) {
 					duration = this.get('transitionDuration');
 				}
-				
+
 				run.later(this, resolve, duration);
 			});
 		});
@@ -283,32 +311,32 @@ export default Mixin.create({
     	this.set('isDropping', false);
     	this._tellGroup('commit', this);
 	},
-  
+
 	freeze() {
 		let el = this.$();
 		if (!el) { return; }
-		
+
 		this.$().css({ transition: 'none' });
 		this.$().height(); // Force-apply styles
 	},
-	
+
 	reset() {
 		let el = this.$();
 		if (!el) { return; }
-		
+
 		delete this._y;
 		delete this._x;
-		
+
 		el.css({ transform: '' });
 	},
-	
+
 	thaw() {
 		let el = this.$();
 		if (!el) { return; }
 		el.css({ transition: '' });
 	}
-  
-  
+
+
 });
 
 /**
