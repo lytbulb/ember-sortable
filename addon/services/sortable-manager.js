@@ -119,6 +119,7 @@ export default Ember.Service.extend({
 	unsubscribe() {
 		this.get('groups').forEach(group => {
 			group.setProperties({
+				acceptsDrop: null,
 				rejectsDrop: null,
 				mouseEnter: null,
 				mouseLeave: null
