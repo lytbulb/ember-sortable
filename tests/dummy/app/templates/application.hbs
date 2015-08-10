@@ -29,16 +29,14 @@
 		  	{{item}} 
 		  {{/each}}
 		 </div>
-		  {{#sortable-group connect="only-german" tagName="ol" model=model.three onMove="move" onAdd="add" onRemove="remove" as |group|}}
-	        {{#each model.three as |item|}}
+		  {{#sortable-each connect="only-german" tagName="ol" model=model.three onMove="move" onAdd="add" onRemove="remove" as |item group|}}
 	          {{#sortable-item tagName="li" model=item group=group handle=".handle"}}
 	            {{item}}
 	            <span class="handle">
 	              <span>&vArr;</span>
 	            </span>
 	          {{/sortable-item}}
-	        {{/each}}
-	      {{/sortable-group}}
+	      {{/sortable-each}}
       </div>
       <div>
       	<div style="font-size: 11px;">
