@@ -3,8 +3,14 @@ import computed from 'ember-new-computed';
 
 export default Ember.Service.extend({
 
+	/**
+	* @type {Array.<SortableGroup>} group
+	*/
 	groups: computed(() => Ember.A()).readOnly(),
 
+	/**
+	* @param {SortableGroup} group
+	*/
 	register(group) {
 		this.get('groups').push(group);
 	},
