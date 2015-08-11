@@ -60,11 +60,24 @@ export default Component.extend({
 	position: computed({
 		get() {
 			if (!this._position) {
-				this._position = {
-		    		x: this.get('sortedItems.firstObject.x'),
-		    		y: this.get('sortedItems.firstObject.y')
-		    	};
+    	
+				let first = this.get('sortedItems').findBy('isDragging', false);
+				
+				if (first) {
+					this._position = {
+			    		x: first.get('x'),
+			    		y: first.get('y')
+			    	};
+				} else {
+					// the group is empty
+					let item = this.get('sortedItems').findBy('isDragging', true);
+					this._position = {
+						x: this.element.scrollLeft + this.element.offsetLeft - parseFloat(this.$().css('padding-top')) + parseFloat(item.$().css('margin-top')),
+						y: this.element.scrollTop + this.element.offsetTop + parseFloat(this.$().css('padding-left')) + parseFloat(item.$().css('margin-left'))
+					}
+				}
 			}
+			
 			return {
 				x: this._position.x,
 				y: this._position.y
@@ -184,6 +197,8 @@ export default Component.extend({
     		rejectsDrop: false,
     		inviteDrop: false
     	});
+    	
+    	delete this._position;
     	
     	run.schedule('render', () => {
     		items.invoke('freeze');
