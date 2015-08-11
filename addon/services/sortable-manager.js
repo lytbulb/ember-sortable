@@ -94,11 +94,11 @@ export default Ember.Service.extend({
 		source.cleanup();
 		
 		if (group === source && insertAt !== removeAt) {
-			group.sendAction('onMove', item.get('model'), group.get('model'), insertAt);
+			group.sendAction('onMove', item.get('model'), group.get('model'), insertAt, group.get('unique'));
 		}
 		else if (group !== source) {
-			source.sendAction('onRemove', item.get('model'), source.get('model'), removeAt);
-			group.sendAction('onAdd', item.get('model'), group.get('model'), insertAt);
+			source.sendAction('onRemove', item.get('model'), source.get('model'), removeAt, source.get('unique'));
+			group.sendAction('onAdd', item.get('model'), group.get('model'), insertAt, group.get('unique'));
 		}
 	},
 	

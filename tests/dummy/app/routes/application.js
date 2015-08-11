@@ -13,15 +13,18 @@ export default Ember.Route.extend({
 
   actions: {
     
-    add(item, source, index) {
+    add(item, source, index, unique) {
+    	console.log('add item to:', unique);
     	source.insertAt(index, item);
     },
     
-    remove(item, source, index) {
+    remove(item, source, index, unique) {
+    	console.log('remove item from:', unique);
     	source.removeObject(item);
     },
     
-    move(item, source, index) {
+    move(item, source, index, unique) {
+    	console.log('move item within:', unique);
     	source.removeObject(item).insertAt(index, item);
     }
     

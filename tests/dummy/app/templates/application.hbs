@@ -12,7 +12,7 @@
 		  	{{item}} 
 		  {{/each}}
 		 </div>
-		  {{#sortable-group connect="no-german" tagName="ol" model=model.one onMove="move" onAdd="add" onRemove="remove" as |group|}}
+		  {{#sortable-group connect="no-german" tagName="ol" model=model.one unique="one" onMove="move" onAdd="add" onRemove="remove" as |group|}}
 		    {{#each model.one as |item|}}
 		      {{#sortable-item tagName="li" model=item group=group handle=".handle"}}
 		        {{item}}
@@ -29,7 +29,7 @@
 		  	{{item}} 
 		  {{/each}}
 		 </div>
-		  {{#sortable-each connect="only-german" tagName="ol" model=model.three onMove="move" onAdd="add" onRemove="remove" as |item group|}}
+		  {{#sortable-each connect="only-german" tagName="ol" model=model.three unique="three" onMove="move" onAdd="add" onRemove="remove" as |item group|}}
 	          {{#sortable-item tagName="li" model=item group=group handle=".handle"}}
 	            {{item}}
 	            <span class="handle">
@@ -44,7 +44,7 @@
 		  	{{item}} 
 		  {{/each}}
 		 </div>
-		  {{#sortable-group connect="no-german" tagName="ol" model=model.two onMove="move" onAdd="add" onRemove="remove" as |group|}}
+		  {{#sortable-group connect="no-german" tagName="ol" model=model.two unique="two" onMove="move" onAdd="add" onRemove="remove" as |group|}}
 	        {{#each model.two as |item|}}
 	          {{#sortable-item tagName="li" model=item group=group handle=".handle"}}
 	            {{item}}
