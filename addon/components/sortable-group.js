@@ -99,6 +99,10 @@ export default Component.extend({
     register: Ember.on('didInsertElement', function() {
 		this.get('manager').register(this);
 	}),
+	
+	unregister: Ember.on('willDestroyElement', function() {
+		this.get('manager').unregister(this);
+	}),
     
     /**
     * @param {SortableItem} item

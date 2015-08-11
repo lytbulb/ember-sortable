@@ -12,7 +12,14 @@ export default Ember.Service.extend({
 	* @param {SortableGroup} group
 	*/
 	register(group) {
-		this.get('groups').push(group);
+		this.get('groups').addObject(group);
+	},
+	
+	/**
+	* @param {SortableGroup} group
+	*/
+	unregister(group) {
+		this.get('groups').removeObject(group);
 	},
 	
 	/**
