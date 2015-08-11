@@ -9,7 +9,7 @@ export default Mixin.create({
 	
 	manager: Ember.inject.service('sortable-manager'),
 	
-	deregister: Ember.on('willDestroyElement', function() {
+	unregister: Ember.on('willDestroyElement', function() {
 		this.set('group', null);
 	}),
 	
