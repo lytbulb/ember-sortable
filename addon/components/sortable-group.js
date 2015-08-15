@@ -88,6 +88,43 @@ export default Component.extend({
 		}
     }).volatile(),
     
+    width: computed({
+    	get() {
+			if (this._width === undefined) {
+				this._width = 0;
+			}
+			return this._width;
+		},
+		set(key, value) {
+			if (value !== this._width) {
+				this._width = value;
+				this._scheduleApplyPosition();
+			}
+		}
+    }).volatile(),
+    
+    height: computed({
+    	get() {
+			if (this._height === undefined) {
+				this._height = 0;
+			}
+			return this._height;
+		},
+		set(key, value) {
+			if (value !== this._height) {
+				this._height = value;
+				this._scheduleApplyPosition();
+			}
+		}
+    }).volatile(),
+    
+    size: computed('width', 'height', function() {
+		return {
+			width: this.get('width'),
+			height: this.get('height')
+		}
+    }).readOnly(),
+    
     /**
     * @readonly
     * @type {Array.<SortedItem>}
@@ -159,10 +196,11 @@ export default Component.extend({
   	* @param {Array.<SortableItem>} items
   	*/
     update(items) {
-    	let direction = this.get('direction');
-    	let position = this.get('position');
-    	let dimension = this.get('dimension');
-    	
+    	let direction = this.get('direction'),
+    		position = this.get('position'),
+    		dimension = this.get('dimension'),
+    		size = 0;
+    		
     	(items || this.get('sortedItems')).forEach((item, index) => {
     		
     		if (!get(item, 'isDragging')) {
@@ -171,9 +209,21 @@ export default Component.extend({
     			item.set('insertAt', index);
     		}
     		
-    		position[direction] += get(item, dimension);
+    		position[direction] += item.get(dimension);
+    		size += item.get(dimension);
     		
     	});
+    	
+    	this.set(dimension, size);
+    },
+    
+    _scheduleApplyPosition() {
+    	run.scheduleOnce('render', this, '_applyPosition');
+    },
+    
+    _applyPosition() {
+    	if (!this.element) { return; }
+    	this.$().css(this.get('dimension'), this.get('size')[this.get('dimension')]);
     },
     
     /**
