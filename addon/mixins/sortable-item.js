@@ -135,6 +135,7 @@ default Mixin.create({
       return this._y;
     },
     set(key, value) {
+      // if(!this.get('isDragging') && value === 98) debugger;
       if (value !== this._y) {
         this._y = value;
         this._scheduleApplyPosition();
@@ -160,14 +161,30 @@ default Mixin.create({
    * @type {Number}
    */
   height: computed(function() {
-    let el = this.$();
-    let height = el.outerHeight();
-    let marginBottom = parseFloat(el.css('margin-bottom'));
+    if(!this.get('isDragging') || !this.get('_height')){
+      let el = this.$();
+      let height = el.outerHeight();
+      let marginBottom = parseFloat(el.css('margin-bottom'));
 
-    height += marginBottom;
-    height += getBorderSpacing(el).vertical;
+      height += marginBottom;
+      height += getBorderSpacing(el).vertical;
 
-    return height;
+      if(this.get('isDragging')){
+        console.log({
+          outerHeight: el.outerHeight(),
+          marginBottom: parseFloat(el.css('margin-bottom')),
+          borderSpacing: getBorderSpacing(el).vertical,
+          height: height
+        });
+
+      }
+      this.set('_height', height);
+      return height;
+    }
+    else {
+      return this.get('_height');
+    }
+
   }).volatile(),
 
   /**
@@ -243,6 +260,15 @@ default Mixin.create({
     this._tellGroup('handleDrag', this);
   },
 
+  _helperDrag(x, y) {
+    this.setProperties({
+      helperX: x,
+      helperY: y
+    });
+
+    this._tellGroup('handleDrag', this);
+  },
+
   _drop() {
     if (!this.element) {
       return;
@@ -276,11 +302,33 @@ default Mixin.create({
    */
   _makeDragHandler(startEvent) {
     let dragXOrigin = getX(startEvent),
-      dragYOrigin = getY(startEvent),
-      elementXOrigin = this.get('x'),
-      elementYOrigin = this.get('y');
+        dragYOrigin = getY(startEvent),
+        elementXOrigin = this.get('x'),
+        elementYOrigin = this.get('y'),
+        helperXOrigin = this.$().offset().left,
+        helperYOrigin = this.$().offset().top;
 
     return event => {
+      var coordinates = {
+        helperX: helperXOrigin + getX(event) - dragXOrigin,
+        helperY: helperYOrigin + getY(event) - dragYOrigin,
+        elementX: elementXOrigin + getX(event) - dragXOrigin,
+        elementY: elementYOrigin + getY(event) - dragYOrigin
+      }
+
+      // Ember.$('#block1').css({
+      //   top: coordinates.helperY,
+      //   left: coordinates.helperX,
+      //   position: 'fixed',
+      //   background: 'red',
+      //   width: '60px',
+      //   height: '20px',
+      //   'z-index': 1000
+      // });
+
+      this.set("helperX", coordinates.helperX);
+      this.set("helperY", coordinates.helperY);
+
       this._drag(elementXOrigin + getX(event) - dragXOrigin,
         elementYOrigin + getY(event) - dragYOrigin);
     };
@@ -306,9 +354,20 @@ default Mixin.create({
     let dx = this.get('x') - this.element.offsetLeft + parseFloat(this.$().css('margin-left')),
       dy = this.get('y') - this.element.offsetTop;
 
-    this.$().css({
-      transform: `translate(${dx}px,${dy}px)`
-    });
+      if(this.get('isDragging')) {
+        this.$().css({
+          transform: 'translate(0px,0px)',
+          left: this.get('helperX'),
+          top: this.get('helperY')
+        });
+      }
+      else {
+        this.$().css({
+          transform: `translate(${dx}px,${dy}px)`,
+          top: '',
+          left: ''
+        });
+      }
   },
 
   /**
