@@ -14,30 +14,30 @@ export default Ember.Service.extend({
 	register(group) {
 		this.get('groups').addObject(group);
 	},
-	
+
 	/**
 	* @param {SortableGroup} group
 	*/
 	unregister(group) {
 		this.get('groups').removeObject(group);
 	},
-	
+
 	/**
 	* @param {SortableItem} item
 	* @type {SortableGroup} group
 	*/
 	handleDragStart(item, group) {
 		this.subscribe(item, group);
-		
+
 		group.set('inviteDrop', true);
-		
+
 		item.setProperties({
 			source: group,
 			insertAt: group.indexOf(item),
 			removeAt: group.indexOf(item)
 		});
 	},
-	
+
 	/**
 	* @param {SortableItem} item
 	* @param {SortableGroup} group
@@ -49,34 +49,34 @@ export default Ember.Service.extend({
 			item.get('source').update();
 		}
 	},
-	
+
 	/**
 	* @param {SortableItem} item
 	* @param {SortableGroup} group
 	*/
 	handleGroupMouseLeave(item, group) {
 		let source = item.get('source');
-	
+
 		item.set('group', null);
-		
+
 		group.set('inviteDrop', false);
-		
+
 		// update the group as the item is no longer in it
 		if (group !== source) {
 			group.update();
 		}
-		
+
 		// highlight item's original position in the source
 		source.welcome(item.get('removeAt'), item);
 	},
-	
+
 	/**
 	* @param {SortableItem} item
 	*/
 	handleDrop(item) {
-		
+
 		this.unsubscribe();
-		
+
 		// if item is dropped outside any group
 		if (!item.get('group')) {
 			// we will set its group back to source
@@ -85,9 +85,9 @@ export default Ember.Service.extend({
 		} else {
 			item.get('group').update();
 		}
-		
+
 	},
-	
+
 	/**
 	* @param {SortableItem} item
 	* @type {SortableGroup} group
@@ -96,10 +96,10 @@ export default Ember.Service.extend({
 		let source = item.get('source'),
 			removeAt = item.get('removeAt'),
 			insertAt = item.get('insertAt');
-			
+
 		group.cleanup();
 		source.cleanup();
-		
+
 		if (group === source && insertAt !== removeAt) {
 			group.sendAction('onMove', item.get('model'), group.get('model'), insertAt, group.get('unique'));
 		}
@@ -107,8 +107,10 @@ export default Ember.Service.extend({
 			source.sendAction('onRemove', item.get('model'), source.get('model'), removeAt, source.get('unique'));
 			group.sendAction('onAdd', item.get('model'), group.get('model'), insertAt, group.get('unique'));
 		}
+
+		group.sendAction('onAll', item.get('model'), source.get('model'), removeAt, group.get('model'), insertAt, group.get('unique'))
 	},
-	
+
 	/**
 	* @param {SortableItem} item
 	*/
@@ -122,7 +124,7 @@ export default Ember.Service.extend({
 			});
 		});
 	},
-	
+
 	unsubscribe() {
 		this.get('groups').forEach(group => {
 			group.setProperties({
