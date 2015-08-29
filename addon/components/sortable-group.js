@@ -103,19 +103,28 @@ export default Component.extend({
 		}
     }).volatile(),
 
+    maxHeight: computed({
+        get() {
+            return this._maxHeight;
+        },
+        set(key, value) {
+            if (value !== this._maxHeight) {
+                this._maxHeight = value;
+                this._scheduleApplyPosition();
+            }
+        }
+    }).volatile(),
+
     height: computed('items.[]', {
-    	get() {
-			if (this._height === undefined) {
-				this._height = 0;
-			}
-			return this._height;
-		},
-		set(key, value) {
-			if (value !== this._height) {
-				this._height = value;
-				this._scheduleApplyPosition();
-			}
-		}
+        get() {
+            return this._height;
+        },
+        set(key, value) {
+            if (value !== this._height) {
+                this._height = value;
+                this._scheduleApplyPosition();
+            }
+        }
     }).volatile(),
 
     size: computed('width', 'height', function() {
@@ -210,11 +219,12 @@ export default Component.extend({
 
     	(items || this.get('sortedItems')).forEach((item, index) => {
 
-    		if (!get(item, 'isDragging')) {
-    			item.setProperties(position);
-    		} else {
-    			item.set('insertAt', index);
-    		}
+            if (!get(item, 'isDragging')) {
+                item.setProperties(position);
+            } else {
+                item.set('insertAt', index);
+            }
+
 
     		position[direction] += item.get(dimension);
     		size += item.get(dimension);
@@ -229,8 +239,10 @@ export default Component.extend({
     },
 
     _applyPosition() {
-    	if (!this.element) { return; }
-    	this.$().css(this.get('dimension'), this.get('size')[this.get('dimension')]);
+        if (!this.element) { return; }
+        this.$().css(this.get('dimension'), this.get('size')[this.get('dimension')]);
+
+        this.$().css('max-height', this.get('maxHeight'));
     },
 
     /**
