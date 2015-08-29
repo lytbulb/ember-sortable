@@ -103,7 +103,7 @@ export default Component.extend({
 		}
     }).volatile(),
 
-    height: computed({
+    height: computed('items.[]', {
     	get() {
 			if (this._height === undefined) {
 				this._height = 0;
