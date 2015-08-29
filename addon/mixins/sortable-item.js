@@ -316,21 +316,17 @@ default Mixin.create({
         elementY: elementYOrigin + getY(event) - dragYOrigin
       }
 
-      // Ember.$('#block1').css({
-      //   top: coordinates.helperY,
-      //   left: coordinates.helperX,
-      //   position: 'fixed',
-      //   background: 'red',
-      //   width: '60px',
-      //   height: '20px',
-      //   'z-index': 1000
-      // });
-
       this.set("helperX", coordinates.helperX);
       this.set("helperY", coordinates.helperY);
 
-      this._drag(elementXOrigin + getX(event) - dragXOrigin,
-        elementYOrigin + getY(event) - dragYOrigin);
+      let groupY = this.get('group').$().offset().top;
+      let groupScrollY = this.get('group').$().scrollTop();
+      let pageMouseY = getY(event);
+
+      let x = elementXOrigin + getX(event) - dragXOrigin;
+      let y = pageMouseY - groupY + groupScrollY;
+
+      this._drag(x, y);
     };
   },
 
