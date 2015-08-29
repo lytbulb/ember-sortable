@@ -107,6 +107,8 @@ export default Ember.Service.extend({
 			source.sendAction('onRemove', item.get('model'), source.get('model'), removeAt, source.get('unique'));
 			group.sendAction('onAdd', item.get('model'), group.get('model'), insertAt, group.get('unique'));
 		}
+
+		group.sendAction('onAll', item.get('model'), source.get('model'), removeAt, group.get('model'), insertAt, group.get('unique'))
 	},
 
 	/**
