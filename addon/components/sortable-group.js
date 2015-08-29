@@ -103,14 +103,16 @@ export default Component.extend({
         }
     }).volatile(),
 
-    height: computed({
+    height: computed('items.[]', {
         get() {
             if (this._height === undefined) {
                 this._height = 0;
             }
+            console.log('getting height', this._height);
             return this._height;
         },
         set(key, value) {
+            console.log('setting height', value);
             if (value !== this._height) {
                 this._height = value;
                 this._scheduleApplyPosition();
