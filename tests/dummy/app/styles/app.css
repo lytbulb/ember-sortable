@@ -50,6 +50,8 @@
   min-width: 250px;
   min-height: 45px;
   transition: all 0.125s;
+  max-height: 200px;
+  overflow-y: auto;
 }
 
 .demo ol li {
@@ -80,14 +82,15 @@
 }
 
 
-.vertical-demo .sortable-item {
+.vertical-demo .sortable-item, .ember-sortable-helper {
   display: block;
   position: relative;
   background: pink;
   margin: 4px 0;
 }
 
-.vertical-demo .sortable-item.is-dragging {
+
+.vertical-demo .sortable-item.is-dragging, .ember-sortable-helper {
   background: red;
 }
 
@@ -96,7 +99,7 @@
   z-index: 10;
 }
 
-.vertical-demo .sortable-item .handle {
+.vertical-demo .sortable-item .handle, .ember-sortable-helper .handle {
   display: block;
   position: absolute;
   top: 0; right: 0; bottom: 0;

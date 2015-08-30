@@ -215,6 +215,8 @@ default Mixin.create({
       return;
     }
 
+    this._addHelper(event);
+
     event.preventDefault();
     event.stopPropagation();
 
@@ -260,6 +262,34 @@ default Mixin.create({
     this._waitForTransition().then(run.bind(this, '_complete'));
   },
 
+  _addHelper() {
+    let helper = this.$().clone();
+
+    helper.css({
+      position: 'fixed', 'z-index': 4000,
+      width: this.$().outerWidth(),
+      height: this.$().outerHeight(),
+      'pointer-events': 'none'
+    });
+
+    helper.addClass('ember-sortable-helper');
+
+    helper.appendTo(document.body);
+    this.set('helper', helper);
+  },
+
+  _updateHelper(x, y) {
+    let helper = this.get('helper');
+    helper.css({
+      left: x,
+      top: y
+    });
+  },
+
+  _removeHelper() {
+    this.get('helper').remove();
+  },
+
   /*
     @method _preventClick
     @private
@@ -275,15 +305,35 @@ default Mixin.create({
    * @return {Function}
    */
   _makeDragHandler(startEvent) {
-    let dragXOrigin = getX(startEvent),
-      dragYOrigin = getY(startEvent),
-      elementXOrigin = this.get('x'),
-      elementYOrigin = this.get('y');
+    let dragOffset = {
+      x: getX(startEvent) - this.$().offset().left,
+      y: getY(startEvent) - this.$().offset().top
+    };
 
     return event => {
-      this._drag(elementXOrigin + getX(event) - dragXOrigin,
-        elementYOrigin + getY(event) - dragYOrigin);
-    };
+      if(this.get('group')){
+        let groupOffset = this.get('group').$().offset();
+        let paddingLeft = parseFloat(this.get('group').$().css('padding-left'));
+        let paddingTop = parseFloat(this.get('group').$().css('padding-top'));
+
+        let mouseRelativeToGroup = {
+          x: getX(event) - groupOffset.left - paddingLeft,
+          y: getY(event) - groupOffset.top - paddingTop,
+        }
+
+        // position relative to group
+        this._drag(
+          mouseRelativeToGroup.x + this.get('group').$().scrollLeft() - dragOffset.x,
+          mouseRelativeToGroup.y + this.get('group').$().scrollTop() - dragOffset.y + this.get('group.position').y
+        );
+      }
+
+      // position relative to screen
+      this._updateHelper(
+        getX(event) - dragOffset.x,
+        getY(event) - dragOffset.y
+      );
+    }
   },
 
   _tellGroup(method, ...args) {
@@ -331,6 +381,7 @@ default Mixin.create({
   _complete() {
     this.set('isDropping', false);
     this._tellGroup('commit', this);
+    this._removeHelper();
   },
 
   freeze() {

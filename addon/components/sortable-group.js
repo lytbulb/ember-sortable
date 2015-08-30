@@ -7,26 +7,26 @@ const a = A;
 export default Component.extend({
 
 	classNameBindings: ['acceptsDrop', 'rejectsDrop', 'inviteDrop'],
-	
+
 	layout: layout,
-	
+
 	/**
 	* @type {SortableManager}
 	*/
 	manager: Ember.inject.service('sortable-manager'),
-	
+
 	acceptsDrop: false,
-	
+
 	rejectsDrop: false,
-	
+
 	inviteDrop: false,
-	
-	
+
+
 	/**
 	* @type {String}
 	*/
 	direction: 'y',
-	
+
 	/**
     * Dimension based on direction.
     * @readonly
@@ -38,20 +38,20 @@ export default Component.extend({
     		y: 'height'
     	}[this.get('direction')];
   	}).readOnly(),
-	
+
 	/**
 	* @readonly
 	* @type {Array.<SortableItem>}
 	*/
 	items: computed(() => a()).readOnly(),
-	
+
 	/**
 	* The frequency in milliseconds with which the group updates
 	* the items' position.
 	* @type {Number}
 	*/
 	updateInterval: 125,
-  
+
 	/**
 	* Position for the first item.
 	* @readonly
@@ -60,9 +60,9 @@ export default Component.extend({
 	position: computed({
 		get() {
 			if (!this._position) {
-    	
+
 				let first = this.get('sortedItems').findBy('isDragging', false);
-				
+
 				if (first) {
 					this._position = {
 			    		x: first.get('x'),
@@ -77,7 +77,7 @@ export default Component.extend({
 					}
 				}
 			}
-			
+
 			return {
 				x: this._position.x,
 				y: this._position.y
@@ -87,7 +87,7 @@ export default Component.extend({
 			this._position = value;
 		}
     }).volatile(),
-    
+
     width: computed({
     	get() {
 			if (this._width === undefined) {
@@ -102,7 +102,7 @@ export default Component.extend({
 			}
 		}
     }).volatile(),
-    
+
     height: computed({
     	get() {
 			if (this._height === undefined) {
@@ -117,14 +117,14 @@ export default Component.extend({
 			}
 		}
     }).volatile(),
-    
+
     size: computed('width', 'height', function() {
 		return {
 			width: this.get('width'),
 			height: this.get('height')
 		}
     }).readOnly(),
-    
+
     /**
     * @readonly
     * @type {Array.<SortedItem>}
@@ -132,43 +132,43 @@ export default Component.extend({
     sortedItems: computed(function() {
     	return a(this.get('items')).sortBy(this.get('direction'));
     }).volatile().readOnly(),
-    
+
     register: Ember.on('didInsertElement', function() {
 		this.get('manager').register(this);
 	}),
-	
+
 	unregister: Ember.on('willDestroyElement', function() {
 		this.get('manager').unregister(this);
 	}),
-    
+
     /**
     * @param {SortableItem} item
     */
     registerItem(item) {
     	this.get('items').addObject(item);
     },
-    
+
     /**
     * @param {SortableItem} item
     */
     deregisterItem(item) {
     	this.get('items').removeObject(item);
     },
-    
+
     /**
     * @param {SortableGroup} group
     */
     isConnected(group) {
     	return this.get('connect') === group.get('connect');
     },
-    
+
     /**
     * @param {SortableItem} item
     */
     indexOf(item) {
     	return this.get('sortedItems').indexOf(item);
     },
-    
+
     /**
     * @param {SortableItem} item
     */
@@ -176,21 +176,21 @@ export default Component.extend({
     	this.update();
     	this.get('manager').handleDragStart(item, this);
     },
-    
+
     /**
     * @param {SortableItem} item
     */
     handleDrag(item) {
 		run.throttle(this, 'update', this.get('updateInterval'));
     },
-    
+
     /**
     * @param {SortableItem} item
     */
     handleDrop(item) {
     	this.get('manager').handleDrop(item, this);
     },
-    
+
     /**
   	* Update items position.
   	* @param {Array.<SortableItem>} items
@@ -200,73 +200,73 @@ export default Component.extend({
     		position = this.get('position'),
     		dimension = this.get('dimension'),
     		size = 0;
-    		
+
     	(items || this.get('sortedItems')).forEach((item, index) => {
-    		
+
     		if (!get(item, 'isDragging')) {
     			item.setProperties(position);
     		} else {
     			item.set('insertAt', index);
     		}
-    		
+
     		position[direction] += item.get(dimension);
     		size += item.get(dimension);
-    		
+
     	});
-    	
+
     	this.set(dimension, size);
     },
-    
+
     _scheduleApplyPosition() {
     	run.scheduleOnce('render', this, '_applyPosition');
     },
-    
+
     _applyPosition() {
     	if (!this.element) { return; }
     	this.$().css(this.get('dimension'), this.get('size')[this.get('dimension')]);
     },
-    
+
     /**
   	* Make space for the item.
   	*/
     welcome(index, item) {
     	this.update(this.get('sortedItems').removeObject(item).insertAt(index, item));
     },
-    
+
     /**
     * @method commit
     */
     commit(item) {
     	this.get('manager').handleCommit(item, this);
     },
-    
+
     /**
     * @method cleanup
     */
     cleanup() {
     	let items = this.get('sortedItems');
-    	
+
     	this.setProperties({
     		acceptsDrop: false,
     		rejectsDrop: false,
     		inviteDrop: false
     	});
-    	
+
     	delete this._position;
-    	
+
     	run.schedule('render', () => {
     		items.invoke('freeze');
     	});
-    	
+
     	run.schedule('afterRender', () => {
     		items.invoke('reset');
     	});
-    	
+
     	run.next(() => {
     		run.schedule('render', () => {
     			items.invoke('thaw');
     		});
     	});
     }
-    
+
 });

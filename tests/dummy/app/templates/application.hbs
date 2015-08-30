@@ -5,11 +5,11 @@
 
   <main>
     <section class="vertical-demo flex-box">
-      
+
       <div>
       	<div style="font-size: 11px;">
 	      {{#each model.one as |item|}}
-		  	{{item}} 
+		  	{{item}}
 		  {{/each}}
 		 </div>
 		  {{#sortable-group connect="no-german" tagName="ol" model=model.one unique="one" onMove="move" onAdd="add" onRemove="remove" as |group|}}
@@ -26,7 +26,7 @@
 	  <div>
       	<div style="font-size: 11px;">
 	      {{#each model.three as |item|}}
-		  	{{item}} 
+		  	{{item}}
 		  {{/each}}
 		 </div>
 		  {{#sortable-each connect="only-german" tagName="ol" model=model.three unique="three" onMove="move" onAdd="add" onRemove="remove" as |item group|}}
@@ -41,7 +41,7 @@
       <div>
       	<div style="font-size: 11px;">
 	      {{#each model.two as |item|}}
-		  	{{item}} 
+		  	{{item}}
 		  {{/each}}
 		 </div>
 		  {{#sortable-group connect="no-german" tagName="ol" model=model.two unique="two" onMove="move" onAdd="add" onRemove="remove" as |group|}}
