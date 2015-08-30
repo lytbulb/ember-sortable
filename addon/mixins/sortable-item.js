@@ -7,6 +7,8 @@ const {
   Promise
 } = Ember.RSVP;
 
+let leftClick = 1;
+
 export
 default Mixin.create({
 
@@ -174,7 +176,9 @@ default Mixin.create({
    * @param {jQuery.Event}
    */
   mouseDown(event) {
-    this._primeDrag(event);
+    if(event.which === leftClick){
+      this._primeDrag(event);
+    }
   },
 
   /**
