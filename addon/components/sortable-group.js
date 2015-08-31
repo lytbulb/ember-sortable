@@ -121,7 +121,7 @@ export default Component.extend({
         }
     }).volatile(),
 
-    height: computed('items.[]', {
+    height: computed({
         get() {
             return this._height;
         },
@@ -132,6 +132,11 @@ export default Component.extend({
             }
         }
     }).volatile(),
+
+    onItemsChange: Ember.observer('items.[]', function(){
+        Ember.run.scheduleOnce('afterRender', this, this.update);
+        Ember.run.scheduleOnce('afterRender', this, this.cleanup);
+    }),
 
     size: computed('width', 'height', function() {
 		return {
