@@ -21,6 +21,8 @@ export default Component.extend({
 
 	inviteDrop: false,
 
+    dropTarget: undefined,
+
 
 	/**
 	* @type {String}
@@ -51,6 +53,10 @@ export default Component.extend({
 	* @type {Number}
 	*/
 	updateInterval: 125,
+
+    resolvedDropTarget: computed('dropTarget', function(){
+        return this.get('dropTarget') || this;
+    }),
 
 	/**
 	* Position for the first item.

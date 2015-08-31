@@ -119,6 +119,9 @@ export default Ember.Service.extend({
 			group.setProperties({
 				acceptsDrop: group.get('connect') === source.get('connect'),
 				rejectsDrop: group.get('connect') !== source.get('connect'),
+			});
+
+			group.get('resolvedDropTarget').setProperties({
 				mouseEnter: this.handleGroupMouseEnter.bind(this, item, group),
 				mouseLeave: this.handleGroupMouseLeave.bind(this, item, group)
 			});
@@ -129,7 +132,10 @@ export default Ember.Service.extend({
 		this.get('groups').forEach(group => {
 			group.setProperties({
 				acceptsDrop: null,
-				rejectsDrop: null,
+				rejectsDrop: null
+			});
+
+			group.get('resolvedDropTarget').setProperties({
 				mouseEnter: null,
 				mouseLeave: null
 			});
