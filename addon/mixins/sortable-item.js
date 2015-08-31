@@ -12,7 +12,7 @@ let leftClick = 1;
 export
 default Mixin.create({
 
-  classNameBindings: ['isDragging', 'isDropping', ':sortable-item'],
+  classNameBindings: ['isDragging', 'isDropping', ':sortable-item', 'isBusy'],
 
   manager: Ember.inject.service('sortable-manager'),
 
