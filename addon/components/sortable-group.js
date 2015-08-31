@@ -223,8 +223,9 @@ export default Component.extend({
                 item.setProperties(position);
             } else {
                 item.set('insertAt', index);
+                item.set('dropX', position.x);
+                item.set('dropY', position.y);
             }
-
 
     		position[direction] += item.get(dimension);
     		size += item.get(dimension);

@@ -263,8 +263,28 @@ default Mixin.create({
     });
 
     this.get('manager').handleDrop(this);
+    this._animateHelper();
 
     this._waitForTransition().then(run.bind(this, '_complete'));
+  },
+
+  _animateHelper() {
+    var helperOffset = this.get('helper').offset();
+    var dropX = this.get('dropX');
+    var dropY = this.get('dropY');
+    var groupOffset = this.get('group').$().offset();
+    var groupScrollX = this.get('group').$().scrollLeft();
+    var groupScrollY = this.get('group').$().scrollTop();
+
+    var dx = -(helperOffset.left - (groupOffset.left + dropX - groupScrollX));
+    var dy = -(helperOffset.top - (groupOffset.top + dropY - groupScrollY));
+
+    var helper = this.get('helper');
+    var transition = this.$().css('transition');
+    helper.css({
+      transform: `translate(${dx}px,${dy}px)`,
+      transition: transition
+    });
   },
 
   _addHelper() {
