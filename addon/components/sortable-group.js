@@ -141,6 +141,13 @@ export default Component.extend({
 		this.get('manager').unregister(this);
 	}),
 
+    forceRedraw() {
+        var element = this.$().get(0);
+        element.style.display = 'none';
+        element.offsetHeight;
+        element.style.display = 'block';
+    },
+
     /**
     * @param {SortableItem} item
     */

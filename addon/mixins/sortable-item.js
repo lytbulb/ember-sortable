@@ -215,6 +215,7 @@ default Mixin.create({
       return;
     }
 
+    this.set('requiresRedraw', true);
     this._addHelper(event);
 
     event.preventDefault();
@@ -359,6 +360,12 @@ default Mixin.create({
     this.$().css({
       transform: `translate(${dx}px,${dy}px)`
     });
+
+    if(this.get('requiresRedraw')) {
+      var group = this.get('group');
+      if(group) group.forceRedraw();
+      this.set('requiresRedraw', false);
+    }
   },
 
   /**
@@ -453,11 +460,7 @@ function getX(event) {
   let touches = originalEvent && originalEvent.changedTouches;
   let touch = touches && touches[0];
 
-  if (touch) {
-    return touch.screenX;
-  } else {
-    return event.pageX;
-  }
+  return Math.round(touch ? touch.screenX : event.pageX);
 }
 
 /**
