@@ -294,7 +294,8 @@ default Mixin.create({
       position: 'fixed', 'z-index': 4000,
       width: this.$().outerWidth(),
       height: this.$().outerHeight(),
-      'pointer-events': 'none'
+      'pointer-events': 'none',
+      display: 'none'
     });
 
     helper.addClass('ember-sortable-helper');
@@ -307,7 +308,8 @@ default Mixin.create({
     let helper = this.get('helper');
     helper.css({
       left: x,
-      top: y
+      top: y,
+      display: 'block'
     });
   },
 
