@@ -1,6 +1,7 @@
 import Ember from 'ember';
 import computed from 'ember-new-computed';
 
+
 export default Ember.Service.extend({
 
 	/**
@@ -36,6 +37,21 @@ export default Ember.Service.extend({
 			insertAt: group.indexOf(item),
 			removeAt: group.indexOf(item)
 		});
+	},
+
+	handleDrag(event, item) {
+		var groups = this.get('groups');
+		var group = this.get('group');
+		var currentGroup = groups.find((group) => {
+			return group.isIntersected(event.pageX, event.pageY);
+		});
+
+		if(group !== currentGroup){
+			if(group) this.handleGroupMouseLeave(item, group);
+			if(currentGroup) this.handleGroupMouseEnter(item, currentGroup);
+		}
+
+		this.set('group', currentGroup);
 	},
 
 	/**
@@ -120,11 +136,6 @@ export default Ember.Service.extend({
 				acceptsDrop: group.get('connect') === source.get('connect'),
 				rejectsDrop: group.get('connect') !== source.get('connect'),
 			});
-
-			group.get('resolvedDropTarget').setProperties({
-				mouseEnter: this.handleGroupMouseEnter.bind(this, item, group),
-				mouseLeave: this.handleGroupMouseLeave.bind(this, item, group)
-			});
 		});
 	},
 
@@ -133,11 +144,6 @@ export default Ember.Service.extend({
 			group.setProperties({
 				acceptsDrop: null,
 				rejectsDrop: null
-			});
-
-			group.get('resolvedDropTarget').setProperties({
-				mouseEnter: null,
-				mouseLeave: null
 			});
 		});
 	}

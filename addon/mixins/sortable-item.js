@@ -338,6 +338,8 @@ default Mixin.create({
     };
 
     return event => {
+      this.get('manager').handleDrag(event, this);
+
       if(this.get('group')){
         let groupOffset = this.get('group').$().offset();
         let paddingLeft = parseFloat(this.get('group').$().css('padding-left'));

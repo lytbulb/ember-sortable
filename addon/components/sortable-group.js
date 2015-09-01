@@ -4,6 +4,7 @@ import computed from 'ember-new-computed';
 const { A, Component, get, set, run } = Ember;
 const a = A;
 
+
 export default Component.extend({
 
 	classNameBindings: ['acceptsDrop', 'rejectsDrop', 'inviteDrop'],
@@ -53,10 +54,6 @@ export default Component.extend({
 	* @type {Number}
 	*/
 	updateInterval: 125,
-
-    resolvedDropTarget: computed('dropTarget', function(){
-        return this.get('dropTarget') || this;
-    }),
 
 	/**
 	* Position for the first item.
@@ -187,6 +184,12 @@ export default Component.extend({
     */
     isConnected(group) {
     	return this.get('connect') === group.get('connect');
+    },
+
+    isIntersected(pageX, pageY) {
+        let dropTarget = this.get('dropTarget') || this;
+        let {left, right, top, bottom} = dropTarget.element.getBoundingClientRect();
+        return (left <= pageX && pageX <= right) && (top <= pageY && pageY <= bottom);
     },
 
     /**
