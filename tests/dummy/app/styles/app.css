@@ -3,6 +3,15 @@
 	cursor: move;
 }
 
+.sortable-item.is-busy {
+  visibility: hidden;
+}
+
+.ember-sortable-helper {
+  list-style: none;
+  transition: none;
+}
+
 .demo ol.invite-drop {
 	border: 1px dashed green;
 }
