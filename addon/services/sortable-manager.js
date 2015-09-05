@@ -49,6 +49,9 @@ export default Ember.Service.extend({
 		if(group !== currentGroup){
 			if(group) this.handleGroupMouseLeave(item, group);
 			if(currentGroup) this.handleGroupMouseEnter(item, currentGroup);
+
+			// highlight item's original position in the source
+			if(!currentGroup) source.welcome(item.get('removeAt'), item);
 		}
 
 		this.set('group', currentGroup);
@@ -81,9 +84,6 @@ export default Ember.Service.extend({
 		if (group !== source) {
 			group.update();
 		}
-
-		// highlight item's original position in the source
-		source.welcome(item.get('removeAt'), item);
 	},
 
 	/**
@@ -131,6 +131,8 @@ export default Ember.Service.extend({
 	* @param {SortableItem} item
 	*/
 	subscribe(item, source) {
+		this.set('group', source);
+
 		this.get('groups').forEach(group => {
 			group.setProperties({
 				acceptsDrop: group.get('connect') === source.get('connect'),
@@ -146,6 +148,8 @@ export default Ember.Service.extend({
 				rejectsDrop: null
 			});
 		});
+
+		this.set('group', null);
 	}
 
 });
