@@ -229,7 +229,10 @@ export default Component.extend({
 
     	});
 
-    	this.set(dimension, size);
+        var marginProperty = dimension === 'width' ? 'margin-right' : 'margin-bottom';
+        var margin = parseInt(this.$().css(marginProperty));
+
+    	this.set(dimension, size + margin);
     },
 
     _scheduleApplyPosition() {
