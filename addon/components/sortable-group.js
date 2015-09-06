@@ -260,6 +260,13 @@ export default Component.extend({
     	this.get('manager').handleCommit(item, this);
     },
 
+    cleanupDragStyling() {
+        this.$().css({
+            height: '',
+            width: ''
+        });
+    },
+
     /**
     * @method cleanup
     */

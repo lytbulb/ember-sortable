@@ -143,6 +143,7 @@ export default Ember.Service.extend({
 
 	unsubscribe() {
 		this.get('groups').forEach(group => {
+			group.cleanupDragStyling();
 			group.setProperties({
 				acceptsDrop: null,
 				rejectsDrop: null
