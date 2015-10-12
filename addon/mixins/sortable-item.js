@@ -192,24 +192,36 @@ default Mixin.create({
     @method _primeDrag
     @private
     */
-  _primeDrag(event) {
+  _primeDrag(primeEvent) {
+    const _this = this;
     let handle = this.get('handle');
 
-    if (handle && !$(event.target).closest(handle).length) {
+    if (handle && !$(primeEvent.target).closest(handle).length) {
       return;
     }
 
-    event.preventDefault();
-    event.stopPropagation();
+    primeEvent.preventDefault();
+    primeEvent.stopPropagation();
 
-    let startDragListener = this._startDrag.bind(this);
+    function confirmDragListener(event) {
+      const dragStartTolerance = 10;
 
-    function cancelStartDragListener() {
-      $(window).off('mousemove', startDragListener);
+      const xMovement = Math.abs(getX(event) - getX(primeEvent));
+      const yMovement = Math.abs(getY(event) - getY(primeEvent));
+      const isConfirmed = dragStartTolerance < xMovement || dragStartTolerance < yMovement;
+
+      if(isConfirmed) {
+        _this._startDrag(primeEvent);
+        cancelConfirmDragListener();
+      }
     }
 
-    $(window).one('mousemove', startDragListener);
-    $(window).one('mouseup', cancelStartDragListener);
+    function cancelConfirmDragListener() {
+      $(window).off('mousemove', confirmDragListener);
+    }
+
+    $(window).on('mousemove', confirmDragListener);
+    $(window).one('mouseup', cancelConfirmDragListener);
   },
 
   _startDrag(event) {
@@ -221,9 +233,6 @@ default Mixin.create({
 
     this.set('requiresRedraw', true);
     this._addHelper(event);
-
-    event.preventDefault();
-    event.stopPropagation();
 
     let drag = this._makeDragHandler(event),
       drop = () => {
